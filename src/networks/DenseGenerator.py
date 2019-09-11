@@ -16,13 +16,13 @@ class DenseGenerator(Network):
         with tf.variable_scope(self.name,reuse=reuse):
             output = tf.layers.dense(input, self.layer_dim, activation=tf.nn.leaky_relu,)
             #output = tf.layers.batch_normalization(output)
-            #output=tf.keras.layers.LayerNormalization()(output)
+            output=tf.keras.layers.LayerNormalization()(output)
             output = tf.layers.dense(output, self.layer_dim, activation=tf.nn.leaky_relu)
             #output = tf.layers.batch_normalization(output)
-            #output=tf.keras.layers.LayerNormalization()(output)
+            output=tf.keras.layers.LayerNormalization()(output)
             output = tf.layers.dense(output, self.layer_dim, activation=tf.nn.leaky_relu)
             #output = tf.layers.batch_normalization(output)
-            #output=tf.keras.layers.LayerNormalization()(output)
+            output=tf.keras.layers.LayerNormalization()(output)
             output = tf.layers.dense(output, self.xdim, activation=tf.nn.tanh)
         return output
 

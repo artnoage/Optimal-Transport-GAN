@@ -123,7 +123,7 @@ class VaiosLatent2(Latent):
         super().__init__()
         self.shape = shape
         self.batch_size = batch_size
-        self.initial_points=np.random.normal(0,1,(400,self.shape))
+        self.initial_points=np.random.normal(0,1,(1000,self.shape))
 
     def sample(self, batch_size=None):
         raise NotImplemented
@@ -139,7 +139,7 @@ class VaiosLatent3(Latent):
         super().__init__()
         self.shape = shape
         self.batch_size = batch_size
-        self.initial_points=np.random.normal(0,1,(600,self.shape))
+        self.initial_points=np.random.normal(0,1,(5000,self.shape))
         self.fixed_latent = tf.constant(self.initial_points, dtype=tf.float32)
     def sample(self, batch_size=None):
         raise NotImplemented
