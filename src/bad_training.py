@@ -90,7 +90,7 @@ class AssignmentTraining_new_approach:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining_new_approach(dataset=Mnist32(batch_size=300,dataset_size=300),
+    assignment_training = AssignmentTraining_new_approach(dataset=Mnist32(batch_size=1000,dataset_size=1000),
                                                           latent=VaiosLatent2(shape=20, batch_size=200),
                                                           critic_network=DenseCritic(name="critic", learn_rate=5e-5,
                                                                                    layer_dim=512,xdim=32*32),

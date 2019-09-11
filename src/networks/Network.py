@@ -36,7 +36,7 @@ class Network(ABC):
         :return: an op to train the network
         """
         if optimizer is None:
-            optimizer =tf.train.RMSPropOptimizer(learning_rate=self.learning_rate)
+            optimizer =tf.train.AdamOptimizer(learning_rate=self.learning_rate,beta1=0.5,beta2=0.9)
         else:
             optimizer = optimizer
         trainable_variables = tf.trainable_variables()
