@@ -123,7 +123,7 @@ class VaiosLatent2(Latent):
         super().__init__()
         self.shape = shape
         self.batch_size = batch_size
-        self.initial_points=np.random.normal(0,1,(1000,self.shape))
+        self.initial_points=np.random.normal(0,1,(10000,self.shape))
 
     def sample(self, batch_size=None):
         raise NotImplemented

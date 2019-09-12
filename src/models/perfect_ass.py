@@ -15,8 +15,9 @@ class Vaios_model:
 
     def define_graph(self):
         self.z = self.latent.tensor()
-        self.dataset_size = self.dataset.n_elements
-        self.real_matrix = tf.constant(self.dataset.data[np.arange(0, self.dataset_size)], dtype=tf.float32)
+        self.real_matrix = tf.constant(self.dataset.data[np.arange(0, self.dataset.dataset_size)], dtype=tf.float32)
+
+        self.dataset_size = self.dataset.dataset_size
         self.latent_batch_ph = tf.placeholder(shape=(None, self.latent.shape), dtype=tf.float32)
         self.fake_samples = self.gen_network.tensor(self.z, self.dataset.get_total_shape())
         self.crit_real = self.crit_network.tensor(self.real_matrix,xdim=512)
@@ -57,7 +58,7 @@ class Vaios_model:
         fake_samples_shape = (-1,) + single_image_shape
         real_matrix_shape = (-1,) + single_image_shape
         index = np.arange(0,  self.dataset.batch_size)
-        real_points = tf.gather(self.real_matrix, index, axis=0)
+        real_points = self.dataset.data[index]
         new1 = tf.keras.backend.repeat_elements(
             tf.reshape(real_points,
                        real_matrix_shape
@@ -75,11 +76,14 @@ class Vaios_model:
         )
 
         dist = tf.transpose(self.crit_network.tensor(real_points)) + tf.transpose(tf.reshape(dist, (index.size, tf.shape(fake_samples)[0])))
-        couples = tf.argmin(dist, axis=1, output_type=tf.int32)
+        couples  = tf.argmin(dist, axis=1, output_type=tf.int32)
+        minimizers=couples
         for ith_batch in range(1,ratio):
+            pro_reals = tf.gather(real_points, minimizers)
             index = np.arange(ith_batch * self.dataset.batch_size, (ith_batch + 1) * self.dataset.batch_size)
-            all_index = tf.concat((couples, index),axis=0)
-            real_points = tf.gather(self.real_matrix, all_index, axis=0)
+            indexed_data = self.dataset.data[index]
+            all_index=tf.concat((couples,index),axis=0)
+            real_points =tf.concat((pro_reals,indexed_data),axis=0)
             new1 = tf.keras.backend.repeat_elements(
                 tf.reshape(real_points,
                            real_matrix_shape
@@ -87,7 +91,7 @@ class Vaios_model:
                 latent_batch_size,
                 axis=0
             )
-            new2 = tf.tile(tf.reshape(fake_samples,fake_samples_shape), [tf.size(all_index), 1, 1, 1])
+            new2 = tf.tile(tf.reshape(fake_samples,fake_samples_shape), [tf.shape(real_points)[0], 1, 1, 1])
             new1 = new1+1
             new2 = new2+1
             dist = 1-tf.image.ssim(
@@ -96,7 +100,7 @@ class Vaios_model:
                 2
             )
             dist = tf.transpose(self.crit_network.tensor(real_points))\
-            + tf.transpose(tf.reshape(dist, (tf.size(all_index), tf.shape(fake_samples)[0])))
+            + tf.transpose(tf.reshape(dist, (tf.shape(real_points)[0], tf.shape(fake_samples)[0])))
             minimizers=tf.argmin(dist, axis=1, output_type=tf.int32)
             couples=tf.gather(all_index,minimizers)
         return latent_points, couples
@@ -137,7 +141,7 @@ class Vaios_model:
         crit_assign_weighted = tf.multiply(self.n_assign_ph, tf.squeeze(crit_assign))
         crit_cost = -(
                 (tf.reduce_sum(crit_assign_weighted) / tf.reduce_sum(self.n_assign_ph))
-                - tf.reduce_mean(self.crit_real))
+                - tf.reduce_mean(self.crit_network.tensor(self.dataset.data[0:self.dataset.dataset_size])))
         return crit_cost
 
 

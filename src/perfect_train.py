@@ -2,27 +2,19 @@ import os
 import time
 import tqdm
 
-from data.Cifer32 import Cifar32
 from data.Latent import *
 from logger.LoggerFacade import LoggerFacade
-from models.Assignment import Assignment
-from models.Assignment_new_approach import Assignment_new_approach
 from models.perfect_ass import Vaios_model
 from networks.ConvNew32 import ConvNew32
-from networks.Conv28 import Conv28
 from networks.DeconvNew32 import DeconvNew32
-from networks.Deconv28 import Deconv28
-from logger.Plotting import plot_histogram
 from models.CostType import CostType
 from data.DatasetFacade import DatasetFacade
-from data.Mnist import Mnist
-from data.Fashion32 import Fashion32
 from data.Mnist32 import Mnist32
-from networks.DenseCritic import DenseCritic
 
 from networks.DenseGenerator import *
-from networks.NetworkSaver import NetworkSaver
+from networks.DenseCritic import *
 from Settings import Settings
+
 
 data_path = os.getcwd() + os.sep + "Data"
 import numpy as np
@@ -38,28 +30,23 @@ class AssignmentTraining_new_approach:
                  latent=None,
                  cost_type=None):
 
-
         self.dataset = dataset
         self.latent = latent
         self.critic_network = critic_network
         self.generator_network = generator_network
-        self.network_saver = NetworkSaver(self.dataset.get_total_shape())
         self.experiment_name = "log_" + time.strftime("%Y-%m-%d_%H-%M-%S_")
-        if cost_type == CostType.ASSIGNMENT:
-            self.model = Vaios_model(self.dataset, self.latent, self.generator_network, self.critic_network)
-        self.dataset_facade = DatasetFacade(self.dataset, self.latent, self.model.real_matrix, self.latent)
-
+        self.model = Vaios_model(self.dataset, self.latent, self.generator_network, self.critic_network)
         self.global_step = tf.train.get_or_create_global_step(graph=None)
         self.increase_global_step = tf.assign_add(self.global_step, 1)
         self.session = Settings.create_session()
         self.session.run(tf.initialize_all_variables())
-        self.network_saver.set_saver_and_session(tf.train.Saver(max_to_keep=1), self.session)
+
 
     def train(self, n_critic_loops=None, n_main_loops=None, n_assign_loops=None):
         with self.session as session:
             log_path = os.path.join(os.getcwd(), "logs" + os.sep + self.experiment_name)
             log_writer = tf.summary.FileWriter(log_path, session.graph)
-            self.logger = LoggerFacade(session, log_writer, self.dataset_facade)
+            self.logger = LoggerFacade(session, log_writer, self.dataset.shape)
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
             assign_training = True
@@ -79,7 +66,7 @@ class AssignmentTraining_new_approach:
                             real_idx_big = real_idx_big + real_idx
                 latent_sample_big = np.vstack(tuple(latent_sample_big))
                 real_idx_big = np.vstack(tuple(real_idx_big)).flatten()
-                self.model.train_generator(session, real_idx_big,latent_sample_big,offset=400)
+                self.model.train_generator(session, real_idx_big,latent_sample_big,offset=100)
                 session.run(self.increase_global_step)
                 fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample_big[:18]})
                 reals = self.dataset.data[real_idx_big[:18]]
@@ -104,16 +91,16 @@ class AssignmentTraining_new_approach:
 
 
 def main():
-    Settings.setup_enviroment(gpu=2)
-    assignment_training = AssignmentTraining_new_approach(dataset=Cifar32(batch_size=2500,dataset_size=5000),
-                                                          latent=VaiosLatent2(shape=20, batch_size=400),
+    Settings.setup_enviroment(gpu=0)
+    assignment_training = AssignmentTraining_new_approach(dataset=Mnist32(batch_size=1000,dataset_size=20000),
+                                                          latent=VaiosLatent2(shape=20, batch_size=200),
                                                           cost_type=CostType.ASSIGNMENT,
-                                                          critic_network=ConvNew32(name="critic", learn_rate=1e-4,
-                                                                                   layer_dim=512,channels=3),
+                                                          critic_network=ConvNew32(name="critic", learn_rate=1e-5,
+                                                                                   layer_dim=512),
                                                           generator_network=DeconvNew32(name="generator",
-                                                                                        learn_rate=1e-4, layer_dim=512,channels=3)
+                                                                                        learn_rate=1e-4, layer_dim=512)
                                                           )
-    assignment_training.train(n_main_loops=750, n_critic_loops=20, n_assign_loops=30)
+    assignment_training.train(n_main_loops=750, n_critic_loops=10, n_assign_loops=10)
 
 if __name__ == "__main__":
     main()

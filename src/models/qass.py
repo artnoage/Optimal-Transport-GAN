@@ -43,13 +43,9 @@ class Vaios_model:
         assign_arr = np.zeros(shape=(self.dataset_size,))
         latent_sample_list, real_idx_list = [], []
         for assign_loop in range(assign_loops):
-            latent_points=session.run(self.z)
             for ith_batch in range(ratio):
                 index =np.arange(ith_batch * self.dataset.batch_size, (ith_batch + 1) * self.dataset.batch_size)
-                if ith_batch==0:
-                    all_index=index
-                if ith_batch!=0:
-                    all_index=np.hstack((current_best,index))
+                all_index=index
                 current_best = session.run(self.find_couples, feed_dict={self.real_batch_ph: self.dataset.data[all_index], self.latent_batch_ph:latent_points})
                 current_best=all_index[current_best]
             assign_c = np.reshape(current_best, newshape=[-1, 1])
