@@ -92,7 +92,7 @@ class AssignmentTraining_new_approach:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining_new_approach(dataset=Mnist32(batch_size=1000,dataset_size=20000),
+    assignment_training = AssignmentTraining_new_approach(dataset=Mnist32(batch_size=100,dataset_size=200),
                                                           latent=VaiosLatent2(shape=20, batch_size=200),
                                                           cost_type=CostType.ASSIGNMENT,
                                                           critic_network=ConvNew32(name="critic", learn_rate=1e-5,
@@ -100,7 +100,7 @@ def main():
                                                           generator_network=DeconvNew32(name="generator",
                                                                                         learn_rate=1e-4, layer_dim=512)
                                                           )
-    assignment_training.train(n_main_loops=750, n_critic_loops=10, n_assign_loops=10)
+    assignment_training.train(n_main_loops=750, n_critic_loops=10, n_assign_loops=2)
 
 if __name__ == "__main__":
     main()

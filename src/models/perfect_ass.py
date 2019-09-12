@@ -15,12 +15,11 @@ class Vaios_model:
 
     def define_graph(self):
         self.z = self.latent.tensor()
-        self.real_matrix = tf.constant(self.dataset.data[np.arange(0, self.dataset.dataset_size)], dtype=tf.float32)
-
+        self.real_batch_ph = tf.placeholder(shape=(None, self.dataset.get_total_shape()), dtype=tf.float32,
+                                            name="real_batch_ph")
         self.dataset_size = self.dataset.dataset_size
         self.latent_batch_ph = tf.placeholder(shape=(None, self.latent.shape), dtype=tf.float32)
         self.fake_samples = self.gen_network.tensor(self.z, self.dataset.get_total_shape())
-        self.crit_real = self.crit_network.tensor(self.real_matrix,xdim=512)
         self.crit_fake = self.crit_network.tensor(self.fake_samples,xdim=512)
         self.crit_real_ph = tf.placeholder(tf.float32,name="crit_real")
         self.best_idx_ph = tf.placeholder(tf.int32, shape=(None,), name="best_idx")
@@ -148,7 +147,7 @@ class Vaios_model:
     def assignment_generator_cost_ssim(self):
         single_image_shape = self.dataset.shape
         batch_image_shape = (-1,) + single_image_shape
-        self.real_batch = tf.gather(self.real_matrix, self.real_idx_ph, axis=0)
+        self.real_batch = self.real_batch_ph
         return tf.reduce_mean(
             1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape)+1 ,
                           tf.reshape(self.fake_batch,batch_image_shape)+1
@@ -158,7 +157,7 @@ class Vaios_model:
             )
         )
     def assignment_generator_cost_square(self):
-        self.real_batch = tf.gather(self.real_matrix, self.real_idx_ph, axis=0)
+        self.real_batch = self.real_batch_ph
         subed_batches = self.fake_batch - self.real_batch
         gen_cost = tf.reduce_mean(tf.square(tf.norm(subed_batches, axis=0)))
         return gen_cost
@@ -175,7 +174,7 @@ class Vaios_model:
     def train_generator(self, session, real_idx, latent_sample, offset=2000):
         for c_idx in range(0, int(len(real_idx) - offset + 1), int(offset)):
             step_2_dict = {}
-            step_2_dict.update({self.real_idx_ph: real_idx[c_idx:c_idx + offset],
+            step_2_dict.update({ self.real_batch_ph: self.dataset.data[real_idx[c_idx:c_idx + offset]],
                                 self.latent_batch_ph: latent_sample[c_idx:c_idx + offset]})
             step_2_dict.update({self.gen_network.get_training_placeholder(): True})
             _, A = session.run([self.gen_train_op, self.gen_cost], step_2_dict)
