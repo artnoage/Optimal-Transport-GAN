@@ -49,7 +49,7 @@ class AssignmentTraining:
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
-                        assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops=crit_loop*n_assign_loops)
+                        assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops=(crit_loop+1)*n_assign_loops)
                         self.model.train_critic(session, assign_arr)
                         self.n_zeros = len(assign_arr) - np.count_nonzero(assign_arr)
                         crit_bar.set_description(
@@ -57,7 +57,7 @@ class AssignmentTraining:
                             refresh=False)
                 latent_sample = np.vstack(tuple(latent_sample))
                 real_idx = np.vstack(tuple(real_idx)).flatten()
-                self.model.train_generator(session, real_idx,latent_sample,offset=200)
+                self.model.train_generator(session, real_idx,latent_sample,offset=400)
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
@@ -83,14 +83,14 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=150, dataset_size=300),
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=5000),
                                              latent=Assignment_latent(shape=50, batch_size=200),
-                                             critic_network=ConvNew32(name="critic", learn_rate=1e-5,
+                                             critic_network=ConvNew32(name="critic", learn_rate=1e-4,
                                                                                    layer_dim=512),
                                              generator_network=DeconvNew32(name="generator",
-                                                                                        learn_rate=1e-5, layer_dim=512)
+                                                                                        learn_rate=1e-4, layer_dim=512)
                                              )
-    assignment_training.train(n_main_loops=750, n_critic_loops=10, n_assign_loops=10)
+    assignment_training.train(n_main_loops=750, n_critic_loops=5, n_assign_loops=20)
 
 if __name__ == "__main__":
     main()
