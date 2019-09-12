@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-class Vaios_model:
+class Assignment_model:
 
     def __init__(self,dataset,latent,generator,critic,A_couples=None,A_cost=None):
         self.dataset = dataset
@@ -14,6 +14,8 @@ class Vaios_model:
 
 
     def define_graph(self):
+        self.dataset_size=self.dataset.dataset_size
+
         self.generate_latent_batch = self.latent.tensor()
         self.latent_batch_ph = tf.placeholder(shape=(None, self.latent.shape), dtype=tf.float32)
         self.generate_fake_samples = self.gen_network.tensor(self.generate_latent_batch, self.dataset.get_total_shape())
@@ -36,6 +38,12 @@ class Vaios_model:
 
         self.gen_train_op = self.gen_network.train_op(self.gen_cost)
         self.crit_train_op = self.crit_network.train_op(self.assignment_critic_cost())
+
+    def generate_samples(self,session,latent_sample):
+        return session.run(self.feeded_generated_batch, feed_dict={self.latent_batch_ph: latent_sample[0:5000]})
+
+    def get_fake_tensor(self):
+        return self.feeded_generated_batch
 
     def find_assignments_critic(self,session, assign_loops=100):
         ratio = int(self.dataset.dataset_size / self.dataset.batch_size)
@@ -81,34 +89,13 @@ class Vaios_model:
         return couples
 
     def find_couples_unlimited_square(self):
-        ratio=int(self.dataset_size/ self.dataset.batch_size)
-        latent_points= self.generate_latent_batch
-        index = np.arange(0,  self.dataset.batch_size)
-        real_points = tf.gather(self.real_matrix, index, axis=0)
-        z = tf.expand_dims(self.generate_fake_samples, axis=1) - real_points
+        fake_samples = self.feeded_generated_batch
+        real_points = self.real_batch_ph
+        z = tf.expand_dims(fake_samples, axis=1) - real_points
         norm_mat = 0.1 * tf.square(tf.norm(z, axis=2))
         dist=tf.transpose(self.crit_network.tensor(real_points)) + norm_mat
         couples = tf.argmin(dist, axis=1, output_type=tf.int32)
-        for ith_batch in range(1,ratio):
-            index = np.arange(ith_batch * self.dataset.batch_size, (ith_batch + 1) * self.dataset.batch_size)
-            all_index = tf.concat((couples, index),axis=0)
-            real_points = tf.gather(self.real_matrix, all_index, axis=0)
-            z = tf.expand_dims(self.generate_fake_samples, axis=1) - real_points
-            norm_mat = 0.1 * tf.square(tf.norm(z, axis=2))
-            dist = tf.transpose(self.crit_network.tensor(real_points)) + norm_mat
-            minimizers=tf.argmin(dist, axis=1, output_type=tf.int32)
-            couples=tf.gather(all_index,minimizers)
-        return latent_points, couples
-
-
-
-
-    def generate_samples(self,session,latent_sample):
-        return session.run(self.feeded_generated_batch, feed_dict={self.latent_batch_ph: latent_sample[0:5000]})
-
-    def get_fake_tensor(self):
-        return self.feeded_generated_batch
-
+        return couples
 
 
     def assignment_critic_cost(self):
@@ -128,7 +115,7 @@ class Vaios_model:
         return tf.reduce_mean(
             1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape) + 1,
                             tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1
-                            , 2
+                            , 2 ,filter_size=3
 
 
                             )

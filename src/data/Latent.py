@@ -101,45 +101,14 @@ class TensorflowLatent(Latent):
     def tensor(self):
         return tf.random_normal(shape=(self.batch_size, self.shape))
 
-class VaiosLatent(Latent):
+
+class Assignment_latent(Latent):
 
     def __init__(self, shape=None, batch_size=None):
         super().__init__()
         self.shape = shape
         self.batch_size = batch_size
-        self.initial_points=np.random.normal(0,1,(2400,self.shape))
-
-    def sample(self, batch_size=None):
-        raise NotImplemented
-
-    def tensor(self):
-        dataset = tf.data.Dataset.from_tensor_slices(self.initial_points.astype(np.float32)).repeat().batch(self.batch_size)
-        iterator = dataset.make_one_shot_iterator()
-        return iterator.get_next()
-
-class VaiosLatent2(Latent):
-
-    def __init__(self, shape=None, batch_size=None):
-        super().__init__()
-        self.shape = shape
-        self.batch_size = batch_size
-        self.initial_points=np.random.normal(0,1,(10000,self.shape))
-
-    def sample(self, batch_size=None):
-        raise NotImplemented
-
-    def tensor(self):
-        dataset = tf.data.Dataset.from_tensor_slices(self.initial_points.astype(np.float32)).repeat().batch(self.batch_size)
-        iterator = dataset.make_one_shot_iterator()
-        return iterator.get_next()+0.01*tf.random_normal(shape=(self.batch_size, self.shape))
-
-class VaiosLatent3(Latent):
-
-    def __init__(self, shape=None, batch_size=None):
-        super().__init__()
-        self.shape = shape
-        self.batch_size = batch_size
-        self.initial_points=np.random.normal(0,1,(5000,self.shape))
+        self.initial_points=np.random.normal(0,1,(50000,self.shape))
         self.fixed_latent = tf.constant(self.initial_points, dtype=tf.float32)
     def sample(self, batch_size=None):
         raise NotImplemented
@@ -147,7 +116,7 @@ class VaiosLatent3(Latent):
     def tensor(self):
         a=tf.random_shuffle(self.fixed_latent, seed=None, name=None)
         a=tf.slice(a,[0,0],[self.batch_size,self.shape])
-        return a+0.01*tf.random_normal(shape=(self.batch_size, self.shape))
+        return a+0.05*tf.random_normal(shape=(self.batch_size, self.shape))
 
 class StaticLatent(Latent):
     # TODO: Implement here latent spaces with PCA etc.

@@ -31,7 +31,7 @@ class Mnist32(DatasetNew):
         self.batch_size = batch_size
 
     @staticmethod
-    def generate_data(dataset_size):
+    def generate_data():
         shape = (32, 32, 1)
         (data, label), (_, _) = tf.keras.datasets.mnist.load_data()
         imgs_32 = [scipy.misc.imresize(data[idx], shape)

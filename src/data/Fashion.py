@@ -26,7 +26,7 @@ class Fashion32(DatasetNew):
         self.name = "Fashion32"
         self.data = data
         self.labels = labels
-        self.n_elements = dataset_size
+        self.dataset_size= dataset_size
 
         self.batch_size = batch_size
 

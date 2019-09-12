@@ -4,13 +4,13 @@ import tqdm
 
 from data.Latent import *
 from logger.LoggerFacade import LoggerFacade
-from models.perfect_ass import Vaios_model
+from models.Assignment_model import Assignment_model
 from networks.ConvNew32 import ConvNew32
 from networks.DeconvNew32 import DeconvNew32
 from models.CostType import CostType
 from data.DatasetFacade import DatasetFacade
-from data.Mnist32 import Mnist32
-
+from data.Mnist import Mnist32
+from data.Fashion import Fashion32
 from networks.DenseGenerator import *
 from networks.DenseCritic import *
 from Settings import Settings
@@ -35,7 +35,7 @@ class AssignmentTraining_new_approach:
         self.critic_network = critic_network
         self.generator_network = generator_network
         self.experiment_name = "log_" + time.strftime("%Y-%m-%d_%H-%M-%S_")
-        self.model = Vaios_model(self.dataset, self.latent, self.generator_network, self.critic_network)
+        self.model = Assignment_model(self.dataset, self.latent, self.generator_network, self.critic_network)
         self.global_step = tf.train.get_or_create_global_step(graph=None)
         self.increase_global_step = tf.assign_add(self.global_step, 1)
         self.session = Settings.create_session()
@@ -49,31 +49,30 @@ class AssignmentTraining_new_approach:
             self.logger = LoggerFacade(session, log_writer, self.dataset.shape)
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
-            assign_training = True
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
                 latent_sample_big=[]
                 real_idx_big=[]
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
-                    if assign_training:
-                        for crit_loop in crit_bar:
-                            assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops=n_assign_loops)
-                            self.model.train_critic(session, assign_arr)
-                            self.n_zeros = len(assign_arr) - np.count_nonzero(assign_arr)
-                            crit_bar.set_description(
-                                "step 1: # zeros " + str(self.n_zeros) + " Variance" + str(np.var(assign_arr)),
-                                refresh=False)
-                            latent_sample
-                            real_idx
+                    for crit_loop in crit_bar:
+                        assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops=n_assign_loops)
+                        self.model.train_critic(session, assign_arr)
+                        self.n_zeros = len(assign_arr) - np.count_nonzero(assign_arr)
+                        crit_bar.set_description(
+                        "step 1: # zeros " + str(self.n_zeros) + " Variance" + str(np.var(assign_arr)),
+                            refresh=False)
+                        latent_sample_big=latent_sample_big+latent_sample
+                        real_idx_big=real_idx_big+latent_sample
                 latent_sample_big = np.vstack(tuple(latent_sample))
                 real_idx_big = np.vstack(tuple(real_idx)).flatten()
-                self.model.train_generator(session, real_idx_big,latent_sample_big,offset=100)
+                self.model.train_generator(session, real_idx_big,latent_sample_big,offset=200)
                 session.run(self.increase_global_step)
+
+                # It makes images for Tensorboard
+
                 fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample_big[:18]})
                 reals = self.dataset.data[real_idx_big[:18]]
-                print("logging done")
                 self.log_data(main_loop,n_main_loops)
                 self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
-            self.model.train_generator(session, real_idx_big, latent_sample_big)
             log_writer.close()
 
     def log_data(self, main_loop,max_loop):
@@ -92,8 +91,8 @@ class AssignmentTraining_new_approach:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining_new_approach(dataset=Mnist32(batch_size=600,dataset_size=3000),
-                                                          latent=VaiosLatent2(shape=20, batch_size=50),
+    assignment_training = AssignmentTraining_new_approach(dataset=Fashion32(batch_size=150,dataset_size=300),
+                                                          latent=Assignment_latent(shape=50, batch_size=200),
                                                           cost_type=CostType.ASSIGNMENT,
                                                           critic_network=ConvNew32(name="critic", learn_rate=1e-5,
                                                                                    layer_dim=512),
