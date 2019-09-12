@@ -11,8 +11,6 @@ import scipy as scipy  # Ensure PIL is also installed: pip install pillow # TODO
 import matplotlib
 import skimage
 
-from models.CostType import CostType
-
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -175,27 +173,6 @@ def print_assignment(session,assignment,dataset_facade,dataset):
     print(jan2)
     print(Counter(jan2).get(0))
 
-def find_average_nearest_neigbour(real_points, fake_points, cost_type,norm_mat = None):
-    if cost_type == CostType.WGAN_GRADIENT_PENALTY:
-        dist_mat = scipy.spatial.distance.cdist(real_points,fake_points,metric="euclidean")
-    elif cost_type == CostType.WGAN_WEIGHT_CLIPPING:
-        dist_mat = scipy.spatial.distance.cdist(real_points, fake_points, metric="euclidean")
-    elif cost_type == CostType.WGAN_WEIGTHED_NORM:
-        dist_mat = scipy.spatial.distance.cdist(real_points, fake_points, metric="euclidean",w=norm_mat)
-    elif cost_type == CostType.WGAN_COSINE:
-        dist_mat = scipy.spatial.distance.cdist(real_points, fake_points, metric="cosine")
-    elif cost_type == CostType.WGAN_SQUARE:
-        dist_mat = scipy.spatial.distance.cdist(real_points, fake_points, metric="sqeuclidean")
-    elif cost_type == CostType.SSIM:
-        f = skimage.measure.compare_ssim
-        dist_mat = scipy.spatial.distance.cdist(real_points, fake_points,f)
-
-    else:
-        raise ValueError("This gan has no measurement for closest neighbour")
-
-    idx = np.argmin(dist_mat, axis=0)
-    unique, counts = np.unique(idx, return_counts=True)
-    return np.average(counts)
 
 def get_inception_scores(images, batch_size, num_inception_images):
   """Get Inception score for some images.

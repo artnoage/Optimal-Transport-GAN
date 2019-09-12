@@ -33,8 +33,12 @@ class Assignment_model:
         self.n_assign_ph = tf.placeholder(tf.float32, shape=(None,))
 
 
-        self.find_couples=self.find_couples_unlimited_ssim()
-        self.gen_cost = self.assignment_generator_cost_ssim()
+        #self.find_couples=self.find_couples_unlimited_ssim()
+        #self.gen_cost = self.assignment_generator_cost_ssim()
+
+        self.find_couples = self.find_couples_unlimited_square()
+        self.gen_cost = self.assignment_generator_cost_square()
+
 
         self.gen_train_op = self.gen_network.train_op(self.gen_cost)
         self.crit_train_op = self.crit_network.train_op(self.assignment_critic_cost())
@@ -115,9 +119,7 @@ class Assignment_model:
         return tf.reduce_mean(
             1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape) + 1,
                             tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1
-                            , 2 ,filter_size=3
-
-
+                            , 2
                             )
         )
     def assignment_generator_cost_square(self):

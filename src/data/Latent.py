@@ -116,7 +116,7 @@ class Assignment_latent(Latent):
     def tensor(self):
         a=tf.random_shuffle(self.fixed_latent, seed=None, name=None)
         a=tf.slice(a,[0,0],[self.batch_size,self.shape])
-        return a+0.05*tf.random_normal(shape=(self.batch_size, self.shape))
+        return a+0.02*tf.random_normal(shape=(self.batch_size, self.shape))
 
 class StaticLatent(Latent):
     # TODO: Implement here latent spaces with PCA etc.
