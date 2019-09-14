@@ -83,7 +83,7 @@ class Assignment_model:
         new2 = tf.tile(tf.reshape(fake_samples, fake_samples_shape), [tf.shape(real_points)[0], 1, 1, 1])
         new1 = new1 + 1
         new2 = new2 + 1
-        dist = 1 - tf.image.ssim(
+        dist = 1 - tf.image.psnr(
             new1,
             new2,
             2
