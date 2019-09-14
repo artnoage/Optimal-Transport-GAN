@@ -3,7 +3,8 @@ import numpy as np
 
 class Assignment_model:
 
-    def __init__(self,dataset,latent,generator,critic,A_couples=None,A_cost=None):
+    def __init__(self,dataset,latent,generator,critic,cost,A_couples=None,A_cost=None):
+        self.cost=cost
         self.dataset = dataset
         self.latent = latent
         self.gen_network = generator
@@ -32,12 +33,13 @@ class Assignment_model:
         self.assign_samples_ph = tf.placeholder(tf.float32, shape=(None, self.dataset.get_total_shape()))
         self.n_assign_ph = tf.placeholder(tf.float32, shape=(None,))
 
+        if self.cost=="ssim":
+            self.find_couples=self.find_couples_unlimited_ssim()
+            self.gen_cost = self.assignment_generator_cost_ssim()
 
-        #self.find_couples=self.find_couples_unlimited_ssim()
-        #self.gen_cost = self.assignment_generator_cost_ssim()
-
-        self.find_couples = self.find_couples_unlimited_square()
-        self.gen_cost = self.assignment_generator_cost_square()
+        if self.cost=="square":
+            self.find_couples = self.find_couples_unlimited_square()
+            self.gen_cost = self.assignment_generator_cost_square()
 
 
         self.gen_train_op = self.gen_network.train_op(self.gen_cost)
@@ -120,6 +122,7 @@ class Assignment_model:
             1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape) + 1,
                             tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1
                             , 2
+                            ,filter_size=13
                             )
         )
     def assignment_generator_cost_square(self):

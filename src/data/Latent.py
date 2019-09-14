@@ -94,7 +94,7 @@ class TensorflowLatent(Latent):
         super().__init__()
         self.shape = shape
         self.batch_size = batch_size
-
+        self.name = "Tensorflow_latent"
     def sample(self, batch_size=None):
         raise NotImplemented
 
@@ -110,6 +110,7 @@ class Assignment_latent(Latent):
         self.batch_size = batch_size
         self.initial_points=np.random.normal(0,1,(50000,self.shape))
         self.fixed_latent = tf.constant(self.initial_points, dtype=tf.float32)
+        self.name="Assignment_latent"
     def sample(self, batch_size=None):
         raise NotImplemented
 
