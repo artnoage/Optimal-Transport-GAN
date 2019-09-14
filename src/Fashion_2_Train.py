@@ -84,7 +84,7 @@ class AssignmentTraining:
 
 
 def main():
-    Settings.setup_enviroment(gpu=2)
+    Settings.setup_enviroment(gpu=1)
     assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=5000, dataset_size=5000),
                                              latent=Assignment_latent(shape=120, batch_size=400),
                                              critic_network=DenseCritic(name="critic", learn_rate=1e-4,
