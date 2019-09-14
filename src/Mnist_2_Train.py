@@ -56,16 +56,10 @@ class AssignmentTraining:
                         crit_bar.set_description(
                         "step 1: # zeros " + str(self.n_zeros) + " Variance" + str(np.var(assign_arr)),
                             refresh=False)
-                if self.n_zeros!=0:
-                    latent_sample = np.vstack(tuple(latent_sample))
-                    real_idx = np.vstack(tuple(real_idx)).flatten()
-                    self.model.train_generator(session, real_idx,latent_sample,offset=64)
-                if self.n_zeros==0:
-                    assign_arr, latent_sample, real_idx = self.model.find_assignments_critic(session, assign_loops=100)
-                    latent_sample = np.vstack(tuple(latent_sample))
-                    real_idx = np.vstack(tuple(real_idx)).flatten()
-                    self.model.train_generator(session, real_idx,latent_sample,offset=64)
 
+                latent_sample = np.vstack(tuple(latent_sample))
+                real_idx = np.vstack(tuple(real_idx)).flatten()
+                self.model.train_generator(session, real_idx,latent_sample,offset=64)
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
@@ -90,15 +84,15 @@ class AssignmentTraining:
 
 
 def main():
-    Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=100, dataset_size=100),
-                                             latent=Assignment_latent(shape=250, batch_size=800),
+    Settings.setup_enviroment(gpu=1)
+    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=5000, dataset_size=5000),
+                                             latent=Assignment_latent(shape=120, batch_size=400),
                                              critic_network=DenseCritic(name="critic", learn_rate=1e-4,
                                                                                    layer_dim=512,xdim=32*32),
                                              generator_network=DeconvNew32(name="generator",
                                                                                         learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=100, n_critic_loops=10)
+    assignment_training.train(n_main_loops=1000, n_critic_loops=10)
 
 if __name__ == "__main__":
     main()

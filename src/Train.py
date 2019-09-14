@@ -91,7 +91,7 @@ def main():
                                                                                    layer_dim=512,xdim=32*32),
                                              generator_network=DeconvNew32(name="generator",
                                                                                         learn_rate=1e-4, layer_dim=512),
-                                             cost="square")
+                                             cost="ssim")
     assignment_training.train(n_main_loops=1000, n_critic_loops=10)
 
 if __name__ == "__main__":
