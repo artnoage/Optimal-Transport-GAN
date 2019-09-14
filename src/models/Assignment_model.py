@@ -83,10 +83,11 @@ class Assignment_model:
         new2 = tf.tile(tf.reshape(fake_samples, fake_samples_shape), [tf.shape(real_points)[0], 1, 1, 1])
         new1 = new1 + 1
         new2 = new2 + 1
-        dist = 1 - tf.image.psnr(
+        dist = 1 - tf.image.ssim(
             new1,
             new2,
-            2
+            2,
+            filter_size=4
         )
 
         dist = tf.transpose(self.crit_network.tensor(real_points)) + tf.transpose(
@@ -122,7 +123,7 @@ class Assignment_model:
             1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape) + 1,
                             tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1
                             , 2
-                            ,filter_size=13
+                            ,filter_size=4
                             )
         )
     def assignment_generator_cost_square(self):
