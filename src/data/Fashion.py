@@ -21,7 +21,7 @@ class Fashion32(DatasetNew):
         # Load data.
         super().__init__()
         self.shape = (32, 32, 1)
-        data,labels = self.generate_data(dataset_size)
+        data,labels = self.generate_data()
         # Initialize class.
         self.name = "Fashion32"
         self.data = data
@@ -31,7 +31,7 @@ class Fashion32(DatasetNew):
         self.batch_size = batch_size
 
     @staticmethod
-    def generate_data(dataset_size):
+    def generate_data():
         shape = (32, 32, 1)
         (data, label), (_, _) = tf.keras.datasets.fashion_mnist.load_data()
         imgs_32 = [scipy.misc.imresize(data[idx], shape)

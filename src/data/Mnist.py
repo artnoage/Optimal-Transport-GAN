@@ -21,7 +21,7 @@ class Mnist32(DatasetNew):
         # Load data.
         super().__init__()
         self.shape = (32, 32, 1)
-        data,labels = self.generate_data(dataset_size)
+        data,labels = self.generate_data()
         # Initialize class.
         self.name = "Mnist"
         self.data = data

@@ -48,9 +48,10 @@ class AssignmentTraining:
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
+                assignment_loops=int(20*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/100))+20
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
-                        assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops=int(15*self.dataset.dataset_size/self.latent.batch_size))
+                        assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops= assignment_loops)
                         self.model.train_critic(session, assign_arr)
                         self.n_zeros = len(assign_arr) - np.count_nonzero(assign_arr)
                         crit_bar.set_description(
@@ -85,14 +86,14 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
-                                             latent=Assignment_latent(shape=150, batch_size=100),
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=100, dataset_size=100),
+                                             latent=Assignment_latent(shape=150, batch_size=700),
                                              critic_network=DenseCritic(name="critic", learn_rate=1e-4,
                                                                                    layer_dim=512,xdim=32*32),
                                              generator_network=DeconvNew32(name="generator",
                                                                                         learn_rate=1e-4, layer_dim=512),
                                              cost="ssim")
-    assignment_training.train(n_main_loops=1000, n_critic_loops=10)
+    assignment_training.train(n_main_loops=1000, n_critic_loops=7)
 
 if __name__ == "__main__":
     main()

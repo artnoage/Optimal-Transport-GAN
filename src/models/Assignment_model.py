@@ -37,6 +37,10 @@ class Assignment_model:
             self.find_couples=self.find_couples_unlimited_ssim()
             self.gen_cost = self.assignment_generator_cost_ssim()
 
+        if self.cost=="psnr":
+            self.find_couples=self.find_couples_unlimited_psnr()
+            self.gen_cost = self.assignment_generator_cost_ssim()
+
         if self.cost=="square":
             self.find_couples = self.find_couples_unlimited_square()
             self.gen_cost = self.assignment_generator_cost_square()
@@ -83,7 +87,7 @@ class Assignment_model:
         new2 = tf.tile(tf.reshape(fake_samples, fake_samples_shape), [tf.shape(real_points)[0], 1, 1, 1])
         new1 = new1 + 1
         new2 = new2 + 1
-        dist = 1 - tf.image.psnr(
+        dist = 5 - 5*tf.image.ssim(
             new1,
             new2,
             2
@@ -93,6 +97,30 @@ class Assignment_model:
             tf.reshape(dist, (tf.shape(real_points)[0], tf.shape(fake_samples)[0])))
         couples  = tf.argmin(dist, axis=1, output_type=tf.int32)
         return couples
+
+    def find_couples_unlimited_psnr(self):
+        fake_samples = self.feeded_generated_batch
+        latent_batch_size = self.latent.batch_size
+        single_image_shape = self.dataset.shape
+        fake_samples_shape = (-1,) + single_image_shape
+        real_matrix_shape = (-1,) + single_image_shape
+        real_points = self.real_batch_ph
+        new1 = tf.keras.backend.repeat_elements(tf.reshape(real_points, real_matrix_shape), latent_batch_size, axis=0)
+        new2 = tf.tile(tf.reshape(fake_samples, fake_samples_shape), [tf.shape(real_points)[0], 1, 1, 1])
+        new1 = new1 + 1
+        new2 = new2 + 1
+        dist = 1 - tf.image.psnr(
+            new1,
+            new2,
+            2
+        )
+
+        dist = tf.transpose(self.crit_network.tensor(real_points)) + tf.transpose(
+            tf.reshape(dist, (tf.shape(real_points)[0], tf.shape(fake_samples)[0])))
+        couples = tf.argmin(dist, axis=1, output_type=tf.int32)
+        return couples
+
+
 
     def find_couples_unlimited_square(self):
         fake_samples = self.feeded_generated_batch
