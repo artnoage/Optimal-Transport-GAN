@@ -87,11 +87,18 @@ class Assignment_model:
         new2 = tf.tile(tf.reshape(fake_samples, fake_samples_shape), [tf.shape(real_points)[0], 1, 1, 1])
         new1 = new1 + 1
         new2 = new2 + 1
-        dist = 5 - 5*tf.image.ssim(
-            new1,
-            new2,
-            2
-        )
+        if self.dataset.shape[2] == 3:
+            dist = 5-5*tf.image.ssim_multiscale(
+                new1,
+                new2,
+               2
+            )
+        else:
+            dist = 5 - 5*tf.image.ssim(
+                new1,
+                new2,
+                2
+            )
 
         dist = tf.transpose(self.crit_network.tensor(real_points)) + tf.transpose(
             tf.reshape(dist, (tf.shape(real_points)[0], tf.shape(fake_samples)[0])))
@@ -133,12 +140,11 @@ class Assignment_model:
 
 
     def assignment_critic_cost(self):
-        weak_idx= np.random.choice(range(self.dataset.dataset_size), self.dataset.batch_size, replace=False)
         crit_assign = self.crit_network.tensor(self.assign_samples_ph,xdim=512)
         crit_assign_weighted = tf.multiply(self.n_assign_ph, tf.squeeze(crit_assign))
         crit_cost = -(
                 (tf.reduce_sum(crit_assign_weighted) / tf.reduce_sum(self.n_assign_ph))
-                - tf.reduce_mean(self.crit_network.tensor(self.dataset.data[weak_idx])))
+                - tf.reduce_mean(self.crit_network.tensor(self.dataset.data[np.arange(0,self.dataset.dataset_size)])))
         return crit_cost
 
 
@@ -146,13 +152,14 @@ class Assignment_model:
         single_image_shape = self.dataset.shape
         batch_image_shape = (-1,) + single_image_shape
         self.real_batch = self.real_batch_ph
-        return tf.reduce_mean(
-            1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape) + 1,
+        if self.dataset.shape[2] == 3:
+            gen_cost = 1-tf.image.ssim_multiscale(tf.reshape(self.real_batch,batch_image_shape) + 1,
                             tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1
-                            , 2
-                            ,filter_size=4
-                            )
-        )
+                            , 2)
+        else:
+            gen_cost=tf.reduce_mean(1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape) + 1,tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1, 2,filter_size=4))
+        return gen_cost
+
     def assignment_generator_cost_square(self):
         self.real_batch = self.real_batch_ph
         subed_batches = self.feeded_generated_batch - self.real_batch

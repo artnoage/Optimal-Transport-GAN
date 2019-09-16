@@ -10,6 +10,7 @@ from networks.DeconvNew32 import DeconvNew32
 from data.DatasetFacade import DatasetFacade
 from data.Mnist import Mnist32
 from data.Fashion import Fashion32
+from data.Cifar_10 import Cifar10_32
 from networks.DenseGenerator import *
 from networks.DenseCritic import *
 from Settings import Settings
@@ -48,7 +49,7 @@ class AssignmentTraining:
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
-                assignment_loops=int(20*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/100))+20
+                assignment_loops=int(15*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/n_main_loops))+15
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
                         assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops= assignment_loops)
@@ -74,7 +75,7 @@ class AssignmentTraining:
     def log_data(self, main_loop,max_loop):
 
         # accumulate some real and fake samples
-        if max_loop-1 == main_loop or main_loop==int(max_loop/2):
+        if max_loop-1 == main_loop or max_loop%100==99:
             fake_points = self.session.run(self.model.generate_fake_samples)
             n_fake_to_save = 100000
             while(fake_points.shape[0]<n_fake_to_save):
@@ -86,14 +87,12 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=100, dataset_size=100),
-                                             latent=Assignment_latent(shape=150, batch_size=700),
-                                             critic_network=DenseCritic(name="critic", learn_rate=1e-4,
-                                                                                   layer_dim=512,xdim=32*32),
-                                             generator_network=DeconvNew32(name="generator",
-                                                                                        learn_rate=1e-4, layer_dim=512),
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
+                                             latent=Assignment_latent(shape=150, batch_size=100),
+                                             critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32),
+                                             generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=512,xdim=32*32),
                                              cost="ssim")
-    assignment_training.train(n_main_loops=1000, n_critic_loops=7)
+    assignment_training.train(n_main_loops=100, n_critic_loops=10)
 
 if __name__ == "__main__":
     main()
