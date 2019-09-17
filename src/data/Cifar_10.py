@@ -35,5 +35,6 @@ class Cifar10_32(DatasetNew):
         data = data / 255
         data = (data - 0.5) / 0.5
         data = data.reshape(data.shape[0], -1)
+        data = np.float32(data)
 
         return data, label
