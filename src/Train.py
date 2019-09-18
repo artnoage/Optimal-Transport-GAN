@@ -95,7 +95,7 @@ def main():
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
                                              generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=512,xdim=32*32*1),
                                              cost="ssim")
-    assignment_training.train(n_main_loops=1000, n_critic_loops=10)
+    assignment_training.train(n_main_loops=100, n_critic_loops=10)
 
 if __name__ == "__main__":
     main()
