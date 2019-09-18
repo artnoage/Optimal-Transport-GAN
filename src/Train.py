@@ -65,23 +65,24 @@ class AssignmentTraining:
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
-
                 fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
                 reals = self.dataset.data[real_idx[:18]]
-                self.log_data(main_loop,n_main_loops)
+                self.log_data(main_loop,n_main_loops,session)
                 self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
                 fake_points = self.session.run(self.model.generate_fake_samples)
                 self.logger.log_image_grid_fixed(fake_points,fake_points,main_loop,name="example_fakes_we_save")
             log_writer.close()
 
-    def log_data(self, main_loop,max_loop):
+    def log_data(self, main_loop,max_loop,session):
 
         # accumulate some real and fake samples
         if max_loop-1 == main_loop or max_loop%100==99:
-            fake_points = self.session.run(self.model.generate_fake_samples)
+            latent_points = session.run(self.model.generate_latent_batch)
+            fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
             n_fake_to_save = 100000
             while(fake_points.shape[0]<n_fake_to_save):
-                fake_points_new = self.session.run(self.model.generate_fake_samples)
+                latent_points = session.run(self.model.generate_latent_batch)
+                fake_points_new = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
                 fake_points = np.vstack((fake_points, fake_points_new))
             dump_path =  "logs" + os.sep + self.experiment_name+os.sep
             np.save(dump_path + "fakes_" +str(max_loop), fake_points)
@@ -89,12 +90,12 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=10, dataset_size=20),
+    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=10, dataset_size=300),
                                              latent=Assignment_latent(shape=150, batch_size=100),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
                                              generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=512,xdim=32*32*1),
                                              cost="ssim")
-    assignment_training.train(n_main_loops=100, n_critic_loops=10)
+    assignment_training.train(n_main_loops=1000, n_critic_loops=10)
 
 if __name__ == "__main__":
     main()
