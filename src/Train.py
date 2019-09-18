@@ -70,6 +70,8 @@ class AssignmentTraining:
                 reals = self.dataset.data[real_idx[:18]]
                 self.log_data(main_loop,n_main_loops)
                 self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
+                fake_points = self.session.run(self.model.generate_fake_samples)
+                self.logger.log_image_grid_fixed(fake_points,fake_points,main_loop,name="example_fakes_we_save")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop):
@@ -87,10 +89,10 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
+    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=10, dataset_size=20),
                                              latent=Assignment_latent(shape=150, batch_size=100),
-                                             critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32),
-                                             generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=512,xdim=32*32),
+                                             critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
+                                             generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=512,xdim=32*32*1),
                                              cost="ssim")
     assignment_training.train(n_main_loops=100, n_critic_loops=10)
 
