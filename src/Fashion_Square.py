@@ -76,7 +76,7 @@ class AssignmentTraining:
     def log_data(self, main_loop,max_loop,session):
 
         # accumulate some real and fake samples
-        if max_loop-1 == main_loop or max_loop%200==199:
+        if max_loop-1 == main_loop or main_loop%200==199:
             latent_points = session.run(self.model.generate_latent_batch)
             fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
             n_fake_to_save = 100000
