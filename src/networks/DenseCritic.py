@@ -16,6 +16,7 @@ class DenseCritic(Network):
             output = tf.layers.dense(inputs, self.layer_dim, activation=tf.nn.leaky_relu)
             output = tf.layers.dense(output, self.layer_dim, activation=tf.nn.leaky_relu)
             output = tf.layers.dense(output, self.layer_dim, activation=tf.nn.leaky_relu)
+            output = tf.layers.dense(output, self.layer_dim, activation=tf.nn.leaky_relu)
             output = tf.layers.dense(output, 1,)
             output = tf.reshape(output, [-1, 1])
         return output

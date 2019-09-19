@@ -89,12 +89,12 @@ class AssignmentTraining:
 
 
 def main():
-    Settings.setup_enviroment(gpu=1)
+    Settings.setup_enviroment(gpu=3)
     assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=5000, dataset_size=5000),
                                              latent=Assignment_latent(shape=2500, batch_size=400),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
                                              generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512),
-                                             cost="square")
+                                             cost="psnr")
     assignment_training.train(n_main_loops=500, n_critic_loops=5)
 
 if __name__ == "__main__":
