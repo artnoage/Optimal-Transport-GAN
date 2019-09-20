@@ -49,16 +49,17 @@ class AssignmentTraining:
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
-                assignment_loops=int(25*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/n_main_loops))+15
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
+                        assignment_loops = int(30 * (self.dataset.dataset_size / self.latent.batch_size) * (crit_loop / n_critic_loops)) + 15
                         assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops= assignment_loops)
                         self.model.train_critic(session, assign_arr)
                         self.n_zeros = len(assign_arr) - np.count_nonzero(assign_arr)
                         crit_bar.set_description(
                         "step 1: # zeros " + str(self.n_zeros) + " Variance" + str(np.var(assign_arr)),
                             refresh=False)
-
+                assign_arr, latent_sample, real_idx = self.model.find_assignments_critic(session,
+                                                                                         assign_loops=10000)
                 latent_sample = np.vstack(tuple(latent_sample))
                 real_idx = np.vstack(tuple(real_idx)).flatten()
                 self.model.train_generator(session, real_idx,latent_sample,offset=50)
@@ -89,13 +90,13 @@ class AssignmentTraining:
 
 
 def main():
-    Settings.setup_enviroment(gpu=1)
+    Settings.setup_enviroment(gpu=0)
     assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=5000, dataset_size=5000),
-                                             latent=Assignment_latent(shape=250, batch_size=400),
+                                             latent=Assignment_latent(shape=250, batch_size=200),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
                                              generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=500, n_critic_loops=5)
+    assignment_training.train(n_main_loops=1, n_critic_loops=1000)
 
 if __name__ == "__main__":
     main()
