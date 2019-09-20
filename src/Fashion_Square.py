@@ -85,7 +85,7 @@ class AssignmentTraining:
                 fake_points_new = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
                 fake_points = np.vstack((fake_points, fake_points_new))
             dump_path =  "logs" + os.sep + self.experiment_name+os.sep
-            np.save(dump_path + "fakes_" +str(max_loop), fake_points)
+            np.save(dump_path + "fakes_" +str(main_loop), fake_points)
 
 
 def main():

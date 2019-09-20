@@ -49,7 +49,7 @@ class AssignmentTraining:
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
-                assignment_loops=int(25*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/n_main_loops))+15
+                assignment_loops=int(20*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/n_main_loops))+15
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
                         assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops= assignment_loops)
@@ -85,7 +85,7 @@ class AssignmentTraining:
                 fake_points_new = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
                 fake_points = np.vstack((fake_points, fake_points_new))
             dump_path =  "logs" + os.sep + self.experiment_name+os.sep
-            np.save(dump_path + "fakes_" +str(max_loop), fake_points)
+            np.save(dump_path + "fakes_" +str(main_loop), fake_points)
 
 
 def main():
@@ -95,7 +95,7 @@ def main():
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
                                              generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512),
                                              cost="ssim")
-    assignment_training.train(n_main_loops=500, n_critic_loops=5)
+    assignment_training.train(n_main_loops=200, n_critic_loops=5)
 
 if __name__ == "__main__":
     main()
