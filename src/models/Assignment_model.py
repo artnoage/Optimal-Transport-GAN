@@ -13,7 +13,7 @@ class Assignment_model:
         self.A_cost = A_cost
         # cifar is too smal to be downsampled that much
         # original (0.0448, 0.2856, 0.3001, 0.2363, 0.1333)
-        self.power_factors = (0.0448, 0.2856, 0.3001)
+        self.power_factors = (0.0448, 0.2856)
         self.define_graph()
 
 
