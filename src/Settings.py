@@ -5,7 +5,7 @@ import sys
 class Settings:
 
     @staticmethod
-    def setup_enviroment(gpu=1):
+    def setup_enviroment(gpu=1,disable_cache=True):
         #os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
         if gpu == 0:
             os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -15,7 +15,9 @@ class Settings:
             os.environ['CUDA_VISIBLE_DEVICES'] = '2'
         if gpu == 3:
             os.environ['CUDA_VISIBLE_DEVICES'] = '3'
-        os.environ['CUDA_CACHE_DISABLE'] = '1'
+
+        if disable_cache:
+            os.environ['CUDA_CACHE_DISABLE'] = '1'
         tf.reset_default_graph()
         sys.path.append(os.getcwd())
 
