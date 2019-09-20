@@ -11,6 +11,9 @@ class Assignment_model:
         self.crit_network = critic
         self.A_couples = A_couples
         self.A_cost = A_cost
+        # cifar is too smal to be downsampled that much
+        # original (0.0448, 0.2856, 0.3001, 0.2363, 0.1333)
+        self.power_factors = (0.0448, 0.2856, 0.3001)
         self.define_graph()
 
 
@@ -91,7 +94,8 @@ class Assignment_model:
             dist = 5-5*tf.image.ssim_multiscale(
                 new1,
                 new2,
-               2
+               2,
+                self.power_factors
             )
         else:
             dist = 5 - 5*tf.image.ssim(
@@ -154,8 +158,9 @@ class Assignment_model:
         self.real_batch = self.real_batch_ph
         if self.dataset.shape[2] == 3:
             gen_cost = 1-tf.image.ssim_multiscale(tf.reshape(self.real_batch,batch_image_shape) + 1,
-                            tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1
-                            , 2)
+                            tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1,
+                                                  2,
+                                                  self.power_factors)
         else:
             gen_cost=tf.reduce_mean(1-tf.image.ssim(tf.reshape(self.real_batch,batch_image_shape) + 1,tf.reshape(self.feeded_generated_batch, batch_image_shape) + 1, 2,filter_size=4))
         return gen_cost
