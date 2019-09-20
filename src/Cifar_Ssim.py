@@ -91,7 +91,7 @@ class AssignmentTraining:
 def main():
     Settings.setup_enviroment(gpu=-1,disable_cache=False)
     assignment_training = AssignmentTraining(dataset=Cifar10_32(batch_size=5000, dataset_size=5000),
-                                             latent=Assignment_latent(shape=250, batch_size=50),
+                                             latent=Assignment_latent(shape=250, batch_size=25),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*3),
                                              generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512, channels=3),
                                              cost="ssim")
