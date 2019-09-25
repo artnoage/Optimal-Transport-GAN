@@ -70,8 +70,9 @@ class AssignmentTraining:
                 reals = self.dataset.data[real_idx[:18]]
                 self.log_data(main_loop,n_main_loops,session)
                 self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
-                fake_points = self.session.run(self.model.generate_fake_samples)
-                self.logger.log_image_grid_fixed(fake_points,fake_points,main_loop,name="example_fakes_we_save")
+                latent_points = session.run(self.model.generate_latent_batch)
+                fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
+                self.logger.log_image_grid_fixed(fake_points,fake_points,main_loop,name="same_latent_as_save")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
