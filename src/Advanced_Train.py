@@ -78,7 +78,7 @@ class AssignmentTraining:
     def log_data(self, main_loop,max_loop,session):
 
         # accumulate some real and fake samples
-        if max_loop-1 == main_loop or main_loop%200==199:
+        if max_loop-1 == main_loop:
             latent_points = session.run(self.model.generate_latent_batch)
             fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
             n_fake_to_save = 100000
@@ -92,8 +92,8 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=500, dataset_size=200),
-                                             latent=Assignment_latent(shape=250, batch_size=1000),
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
+                                             latent=Assignment_latent(shape=250, batch_size=400),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
                                              generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512,channels=1),
                                              cost="square")
