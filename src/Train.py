@@ -67,37 +67,36 @@ class AssignmentTraining:
                 # It makes images for Tensorboard
                 fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
                 reals = self.dataset.data[real_idx[:18]]
-                self.log_data(main_loop, n_main_loops, session)
+                self.log_data(main_loop,n_main_loops,session)
                 self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
                 latent_points = session.run(self.model.generate_latent_batch)
                 fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                self.logger.log_image_grid_fixed(fake_points, fake_points, main_loop, name="same_latent_as_save")
+                self.logger.log_image_grid_fixed(fake_points,fake_points,main_loop,name="same_latent_as_save")
             log_writer.close()
 
-            def log_data(self, main_loop, max_loop, session):
+    def log_data(self, main_loop,max_loop,session):
 
-                # accumulate some real and fake samples
-                if max_loop - 1 == main_loop or main_loop % 200 == 199:
-                    latent_points = session.run(self.model.generate_latent_batch)
-                    fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                    n_fake_to_save = 100000
-                    while (fake_points.shape[0] < n_fake_to_save):
-                        latent_points = session.run(self.model.generate_latent_batch)
-                        fake_points_new = session.run(self.model.get_fake_tensor(),
-                                                      {self.model.latent_batch_ph: latent_points})
-                        fake_points = np.vstack((fake_points, fake_points_new))
-                    dump_path = "logs" + os.sep + self.experiment_name + os.sep
-                    np.save(dump_path + "fakes_" + str(main_loop), fake_points)
+        # accumulate some real and fake samples
+        if max_loop-1 == main_loop or main_loop%200==199:
+            latent_points = session.run(self.model.generate_latent_batch)
+            fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
+            n_fake_to_save = 100000
+            while(fake_points.shape[0]<n_fake_to_save):
+                latent_points = session.run(self.model.generate_latent_batch)
+                fake_points_new = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
+                fake_points = np.vstack((fake_points, fake_points_new))
+            dump_path =  "logs" + os.sep + self.experiment_name+os.sep
+            np.save(dump_path + "fakes_" +str(main_loop), fake_points)
 
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=5000, dataset_size=5000),
-                                             latent=Assignment_latent(shape=250, batch_size=400),
+    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=100, dataset_size=100),
+                                             latent=Assignment_latent(shape=250, batch_size=100),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
                                              generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=500, n_critic_loops=5)
+    assignment_training.train(n_main_loops=1000, n_critic_loops=5)
 
 if __name__ == "__main__":
     main()
