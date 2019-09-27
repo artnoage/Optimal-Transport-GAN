@@ -49,8 +49,8 @@ class AssignmentTraining:
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
-                local_dataset_s = int(min(self.dataset.batch_size+9.5*main_loop, self.dataset.dataset_size))
-                assignment_loops = int(10*((main_loop/n_main_loops)**3) * local_dataset_s / self.latent.batch_size) + 20
+                local_dataset_s = int(min(5*(main_loop)+200, self.dataset.dataset_size))
+                assignment_loops = int(20*((main_loop/n_main_loops)**2) * local_dataset_s / self.latent.batch_size) + 20
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
                         assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops= assignment_loops, local_dataset_size=local_dataset_s)
@@ -62,7 +62,7 @@ class AssignmentTraining:
 
                 latent_sample = np.vstack(tuple(latent_sample))
                 real_idx = np.vstack(tuple(real_idx)).flatten()
-                self.model.train_generator(session, real_idx,latent_sample,offset=50)
+                self.model.train_generator(session, real_idx,latent_sample,offset=5)
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
@@ -92,12 +92,12 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Cifar10_32(batch_size=380, dataset_size=5000),
-                                             latent=Assignment_latent(shape=250, batch_size=120),
-                                             critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*3),
-                                             generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512,channels=3),
-                                             cost="ssim")
-    assignment_training.train(n_main_loops=500, n_critic_loops=2)
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=500, dataset_size=200),
+                                             latent=Assignment_latent(shape=250, batch_size=1000),
+                                             critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
+                                             generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512,channels=1),
+                                             cost="square")
+    assignment_training.train(n_main_loops=1000, n_critic_loops=2)
 
 if __name__ == "__main__":
     main()

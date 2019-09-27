@@ -57,7 +57,8 @@ class Assignment_model:
         return self.feeded_generated_batch
 
     def find_assignments_critic(self,session, assign_loops=100,local_dataset_size=200):
-        ratio =local_dataset_size/ self.dataset.batch_size
+        real_batch_size=min(local_dataset_size,self.dataset.batch_size)
+        ratio =local_dataset_size/ real_batch_size
         if ratio-int(ratio)==0:
             ratio=int(ratio)
         else:
@@ -67,7 +68,7 @@ class Assignment_model:
         for assign_loop in range(assign_loops):
             latent_points=session.run(self.generate_latent_batch)
             for ith in range(ratio):
-                index=np.arange(ith*self.dataset.batch_size,int(min((ith+1)*self.dataset.batch_size,local_dataset_size)))
+                index=np.arange(ith*real_batch_size,int(min((ith+1)*real_batch_size,local_dataset_size)))
                 if ith==0:
                     all_index=index
                 if ith!=0:
