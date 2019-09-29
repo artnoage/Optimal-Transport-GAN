@@ -49,7 +49,7 @@ class AssignmentTraining:
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
-                assignment_loops=int(10*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/n_main_loops))+10
+                assignment_loops=int(20*(self.dataset.dataset_size/self.latent.batch_size)*(main_loop/n_main_loops))+20
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
                         assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops= assignment_loops)
@@ -61,7 +61,7 @@ class AssignmentTraining:
 
                 latent_sample = np.vstack(tuple(latent_sample))
                 real_idx = np.vstack(tuple(real_idx)).flatten()
-                self.model.train_generator(session, real_idx,latent_sample,offset=50)
+                self.model.train_generator(session, real_idx,latent_sample,offset=32)
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
@@ -91,12 +91,12 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Mnist32(batch_size=100, dataset_size=100),
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
                                              latent=Assignment_latent(shape=250, batch_size=100),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=512,xdim=32*32*1),
-                                             generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512),
+                                             generator_network=DeconvNew32(name="generator",learn_rate=5e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=1000, n_critic_loops=5)
+    assignment_training.train(n_main_loops=500, n_critic_loops=4)
 
 if __name__ == "__main__":
     main()
