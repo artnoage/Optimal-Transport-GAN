@@ -123,7 +123,8 @@ class Assignment_model:
         dist = 1 - tf.image.psnr(
             new1,
             new2,
-            2
+            2,
+            filter_size=4
         )
 
         dist = tf.transpose(self.crit_network.tensor(real_points)) + tf.transpose(
