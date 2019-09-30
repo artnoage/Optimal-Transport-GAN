@@ -91,12 +91,12 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
-                                             latent=Assignment_latent(shape=250, batch_size=200),
-                                             critic_network=DenseCritic(name="critic", learn_rate=1e-4,layer_dim=512,xdim=32*32*1),
-                                             generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512),
+    assignment_training = AssignmentTraining(dataset=Cifar10_32(batch_size=1000, dataset_size=1000),
+                                             latent=Assignment_latent(shape=500, batch_size=100),
+                                             critic_network=DenseCritic(name="critic", learn_rate=1e-4,layer_dim=512,xdim=32*32*3),
+                                             generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=1024, xdim=32*32*3),
                                              cost="square")
-    assignment_training.train(n_main_loops=100, n_critic_loops=5)
+    assignment_training.train(n_main_loops=200, n_critic_loops=5)
 
 if __name__ == "__main__":
     main()
