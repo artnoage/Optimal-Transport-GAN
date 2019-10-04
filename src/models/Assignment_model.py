@@ -188,4 +188,4 @@ class Assignment_model:
                                 self.latent_batch_ph: latent_sample[c_idx:c_idx + offset]})
             step_2_dict.update({self.gen_network.get_training_placeholder(): True})
             _, A = session.run([self.gen_train_op, self.gen_cost], step_2_dict)
-            print(A)
+            print("The trasportation distance for this batch is", A)
