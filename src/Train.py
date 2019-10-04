@@ -101,7 +101,8 @@ class AssignmentTraining:
 #For cost you have the options "sqaure", "psnr" and "ssim". "Psnr option trains only the critic with psnr and the generator with SSIM.
 # The reason for doing that is that training the critic with ssim is computationally very expensive while with psnr is cheap and the results are quite similar.
 # Note that psnr is not good enough to train the generator and that is why we dont include an option where psnr is used for both networks.
-
+# For the batch_sizes try to have the Real points batch size as close to the dataset_size as possible. Then increase latent batch size to the degree that memory
+# allows
 def main():
     Settings.setup_enviroment(gpu=0)
     assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
