@@ -56,8 +56,8 @@ class AssignmentTraining:
                 #not help that much
 
                 assignment_loops+=int(self.dataset.dataset_size/(2*self.latent.batch_size))
-                n_critic_loops=-2
-                n_critic_loops=max(n_critic_loops,1)
+                n_critic_loops+=-2
+                n_critic_loops=max(n_critic_loops,2)
                 assignment_loops=min(assignment_loops,500)
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
