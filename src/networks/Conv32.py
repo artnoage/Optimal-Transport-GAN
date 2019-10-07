@@ -1,9 +1,9 @@
-from networks.Network import Network
+from networks.NetworkABC import NetworkABC
 
 import tensorflow as tf
 
 
-class ConvNew32(Network):
+class Conv32(NetworkABC):
 
 
     def __init__(self,name,learn_rate, layer_dim=1024,channels=1):

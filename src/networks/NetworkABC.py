@@ -5,7 +5,7 @@ import tensorflow as tf
 
 
 
-class Network(ABC):
+class NetworkABC(ABC):
     """
     Base class for network. Each networks needs a name to identify its weights and activating training
     when its weights get updated.

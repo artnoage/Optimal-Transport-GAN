@@ -1,9 +1,9 @@
 import tensorflow as tf
 
-from networks.Network import Network
+from networks.NetworkABC import NetworkABC
 
 
-class DeconvNew32(Network):
+class Deconv32(NetworkABC):
 
     def __init__(self,name,learn_rate, layer_dim=1024,channels=1):
         super().__init__(name,learn_rate)

@@ -5,8 +5,8 @@ import tqdm
 from data.Latent import *
 from logger.LoggerFacade import LoggerFacade
 from models.Assignment_model import Assignment_model
-from networks.ConvNew32 import ConvNew32
-from networks.DeconvNew32 import DeconvNew32
+from networks.Conv32 import Conv32
+from networks.Deconv32 import Deconv32
 from data.DatasetFacade import DatasetFacade
 from data.Mnist32 import Mnist32
 from data.Fashion32 import Fashion32
