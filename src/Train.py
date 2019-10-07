@@ -5,12 +5,12 @@ import tqdm
 from data.Latent import *
 from logger.LoggerFacade import LoggerFacade
 from models.Assignment_model import Assignment_model
-from networks.ConvNew32 import ConvNew32
-from networks.DeconvNew32 import DeconvNew32
+from networks.Conv32 import Conv32
+from networks.Deconv32 import Deconv32
 from data.DatasetFacade import DatasetFacade
-from data.Mnist import Mnist32
-from data.Fashion import Fashion32
-from data.Cifar_10 import Cifar10_32
+from data.Mnist32 import Mnist32
+from data.Fashion32 import Fashion32
+from data.Cifar import Cifar
 from networks.DenseGenerator import *
 from networks.DenseCritic import *
 from Settings import Settings
@@ -108,7 +108,7 @@ def main():
     assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
                                              latent=Assignment_latent(shape=250, batch_size=200),
                                              critic_network=DenseCritic(name="critic", learn_rate=1e-4,layer_dim=512,xdim=32*32*1),
-                                             generator_network=DeconvNew32(name="generator",learn_rate=1e-4, layer_dim=512),
+                                             generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
     assignment_training.train(n_main_loops=200, n_critic_loops=5)
 

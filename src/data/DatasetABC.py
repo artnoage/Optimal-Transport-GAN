@@ -1,10 +1,11 @@
 import numpy as np
-from abc import ABC , abstractmethod
+from abc import ABC, abstractmethod
 from functools import reduce
 from operator import mul
 import tensorflow as tf
 
-class DatasetNew(ABC):
+
+class DatasetABC(ABC):
     """
     An abstract class for different datasets.
 
@@ -12,6 +13,7 @@ class DatasetNew(ABC):
 
     The sample methods are implemented here and can be inherited.
     """
+
     def __init__(self):
         """
         :param name: Human-readable name for the dataset.
@@ -84,10 +86,6 @@ class DatasetNew(ABC):
         :return: an iterator over the data
         """
         if self.dataset_iterator is None:
-            #self.data_placeholder = tf.placeholder(np.float32)
-            #dataset = tf.data.Dataset.from_tensor_slices(self.data_placeholder).repeat().batch(self.batch_size)
-            #iterator = dataset.make_initializable_iterator()
-
             dataset = tf.data.Dataset.from_tensor_slices(self.data.astype(np.float32)).repeat().batch(self.batch_size)
             iterator = dataset.make_one_shot_iterator()
             self.dataset_iterator = iterator
@@ -110,5 +108,4 @@ class DatasetNew(ABC):
 
         :return: the total dimension size
         """
-        reduced = reduce(mul, self.shape)
-        return reduced
+        return reduce(mul, self.shape)

@@ -1,10 +1,10 @@
 import numpy as np
 import tensorflow as tf
 
-from networks.Network import Network
+from networks.NetworkABC import NetworkABC
 
 
-class DenseGenerator(Network):
+class DenseGenerator(NetworkABC):
 
     def __init__(self, name=None, learn_rate=None, layer_dim=1024, xdim=20):
         super().__init__(name, learn_rate)

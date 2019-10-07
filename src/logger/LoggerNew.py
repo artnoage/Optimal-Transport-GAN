@@ -26,7 +26,7 @@ class LoggerNew:
 
     def _add_summary(self, input, name, type):
         """
-        Adds a summary and placehoder to the logger for the given input and name
+        Adds a summary and placeholder to the logger for the given input and name
 
         :param type: Type of summary to add
         :param input: Values that should be saved to the log

@@ -6,15 +6,7 @@ class Settings:
 
     @staticmethod
     def setup_enviroment(gpu=1,disable_cache=True):
-        #os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
-        if gpu == 0:
-            os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-        if gpu == 1:
-            os.environ['CUDA_VISIBLE_DEVICES'] = '1'
-        if gpu == 2:
-            os.environ['CUDA_VISIBLE_DEVICES'] = '2'
-        if gpu == 3:
-            os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+        os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
 
         if disable_cache:
             os.environ['CUDA_CACHE_DISABLE'] = '1'

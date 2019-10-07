@@ -47,21 +47,35 @@ class AssignmentTraining:
             log_writer = tf.summary.FileWriter(log_path, session.graph)
             self.logger = LoggerFacade(session, log_writer, self.dataset.shape)
             global_step = session.run(self.global_step)
-            self.n_zeros = self.latent.batch_size
+            self.n_non_assigned = self.latent.batch_size
+            assignment_loops=1
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
-                assignment_loops=int(10*(self.dataset.dataset_size/self.latent.batch_size)*np.sqrt(main_loop/n_main_loops))+10
+
+                #The ideal number for assigment points is 10-12 times the size of the dataset. However it is convinient
+                # to increase the size with the iterations because in the beginning of the training, big number of assignments does
+                #not help that much
+
+                assignment_loops+=int(self.dataset.dataset_size/(2*self.latent.batch_size))
+                n_critic_loops+=-2
+                n_critic_loops=max(n_critic_loops,2)
+                assignment_loops=min(assignment_loops,500)
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
                     for crit_loop in crit_bar:
                         assign_arr, latent_sample,real_idx = self.model.find_assignments_critic(session, assign_loops= assignment_loops)
                         self.model.train_critic(session, assign_arr)
-                        self.n_zeros = len(assign_arr) - np.count_nonzero(assign_arr)
+                        self.n_non_assigned = len(assign_arr) - np.count_nonzero(assign_arr)
                         crit_bar.set_description(
-                        "step 1: # zeros " + str(self.n_zeros) + " Variance" + str(np.var(assign_arr)),
+                        "step 1: Number of non assigned points " + str(self.n_non_assigned) + ",  Variance from perfect assignment" + str(np.var(assign_arr)),
                             refresh=False)
 
                 latent_sample = np.vstack(tuple(latent_sample))
                 real_idx = np.vstack(tuple(real_idx)).flatten()
-                self.model.train_generator(session, real_idx,latent_sample,offset=32)
+
+                # The smaller the offset the more precisely the generator learns. However very small offset number increases the training a lot and may lead to difficulties of traiing the
+                # critic because it converges fast to some of the nodes.
+
+                self.model.train_generator(session, real_idx,latent_sample,offset=16)
+
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
@@ -88,15 +102,20 @@ class AssignmentTraining:
             dump_path =  "logs" + os.sep + self.experiment_name+os.sep
             np.save(dump_path + "fakes_" +str(main_loop), fake_points)
 
+#For cost you have the options "sqaure", "psnr" and "ssim". "Psnr option trains only the critic with psnr and the generator with SSIM.
+# The reason for doing that is that training the critic with ssim is computationally very expensive while with psnr is cheap and the results are quite similar.
+# Note that psnr is not good enough to train the generator and that is why we dont include an option where psnr is used for both networks.
+# For the batch_sizes try to have the Real points batch size as close to the dataset_size as possible. Then increase latent batch size to the degree that memory
+# allows
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Cifar(batch_size=1000, dataset_size=1000),
-                                             latent=Assignment_latent(shape=500, batch_size=200),
-                                             critic_network=DenseCritic(name="critic", learn_rate=1e-4,layer_dim=512,xdim=32*32*3),
-                                             generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=1024, xdim=32*32*3),
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
+                                             latent=Assignment_latent(shape=250, batch_size=200),
+                                             critic_network=DenseCritic(name="critic", learn_rate=1e-4,layer_dim=512,xdim=32*32*1),
+                                             generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=1000, n_critic_loops=5)
+    assignment_training.train(n_main_loops=100, n_critic_loops=60)
 
 if __name__ == "__main__":
     main()

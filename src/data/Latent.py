@@ -1,4 +1,4 @@
-from abc import ABC,abstractmethod
+from abc import ABC, abstractmethod
 import numpy as np
 import tensorflow as tf
 
@@ -55,7 +55,8 @@ class Assignment_latent(Latent):
         self.batch_size = batch_size
         self.initial_points=np.random.normal(0,1,(N_Gaussians,self.shape))
         self.fixed_latent = tf.constant(self.initial_points, dtype=tf.float32)
-        self.name="Assignment_latent"
+        self.name = "Assignment_latent"
+
     def sample(self, batch_size=None):
         raise NotImplemented
 
