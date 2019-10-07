@@ -8,9 +8,9 @@ from models.Assignment_model import Assignment_model
 from networks.ConvNew32 import ConvNew32
 from networks.DeconvNew32 import DeconvNew32
 from data.DatasetFacade import DatasetFacade
-from data.Mnist import Mnist32
-from data.Fashion import Fashion32
-from data.Cifar_10 import Cifar10_32
+from data.Mnist32 import Mnist32
+from data.Fashion32 import Fashion32
+from data.Cifar import Cifar
 from networks.DenseGenerator import *
 from networks.DenseCritic import *
 from Settings import Settings
@@ -91,7 +91,7 @@ class AssignmentTraining:
 
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Cifar10_32(batch_size=1000, dataset_size=1000),
+    assignment_training = AssignmentTraining(dataset=Cifar(batch_size=1000, dataset_size=1000),
                                              latent=Assignment_latent(shape=500, batch_size=200),
                                              critic_network=DenseCritic(name="critic", learn_rate=1e-4,layer_dim=512,xdim=32*32*3),
                                              generator_network=DenseGenerator(name="generator",learn_rate=1e-4, layer_dim=1024, xdim=32*32*3),

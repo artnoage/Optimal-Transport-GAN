@@ -1,32 +1,31 @@
-import tensorflow as tf
-import numpy as np
-import sklearn.metrics
-
 import matplotlib
+import numpy as np
+import tensorflow as tf
 
-from data.Dataset import DatasetNew
+from data.DatasetABC import DatasetABC
 
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import scipy.misc
 
-class Fashion32(DatasetNew):
+
+class Fashion32(DatasetABC):
     """
     Class for the Fashion32 dataset.
     """
-    def __init__(self, batch_size,dataset_size):
+
+    def __init__(self, batch_size, dataset_size):
         """
         :param batch_size: The default batch size.
         """
         # Load data.
         super().__init__()
         self.shape = (32, 32, 1)
-        data,labels = self.generate_data()
+        data, labels = self.generate_data()
         # Initialize class.
         self.name = "Fashion32"
         self.data = data
         self.labels = labels
-        self.dataset_size= dataset_size
+        self.dataset_size = dataset_size
 
         self.batch_size = batch_size
 
@@ -41,5 +40,3 @@ class Fashion32(DatasetNew):
         data = (data - 0.5) / 0.5
         data = data.reshape(data.shape[0], -1)
         return data, label
-
-

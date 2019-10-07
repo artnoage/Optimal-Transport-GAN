@@ -1,18 +1,15 @@
-import tensorflow as tf
-import numpy as np
-import sklearn.metrics
-
 import matplotlib
+import numpy as np
+import tensorflow as tf
 
-from data.Dataset import DatasetNew
+from data.DatasetABC import DatasetABC
 
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import scipy.misc
 
-class Cifar10_32(DatasetNew):
+
+class Cifar(DatasetABC):
     """
-    Class for the cifar10 dataset.
+    Class for the cifar dataset.
     """
     def __init__(self, batch_size,dataset_size):
         """

@@ -8,9 +8,9 @@ from models.Assignment_model import Assignment_model
 from networks.ConvNew32 import ConvNew32
 from networks.DeconvNew32 import DeconvNew32
 from data.DatasetFacade import DatasetFacade
-from data.Mnist import Mnist32
-from data.Fashion import Fashion32
-from data.Cifar_10 import Cifar10_32
+from data.Mnist32 import Mnist32
+from data.Fashion32 import Fashion32
+from data.Cifar import Cifar
 from networks.DenseGenerator import *
 from networks.DenseCritic import *
 from Settings import Settings

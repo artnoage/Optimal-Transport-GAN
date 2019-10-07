@@ -1,19 +1,20 @@
 import tensorflow as tf
 
+
 class DatasetFacade:
     """
         A Facade to give an easy interface to getting a working feed dict
     """
 
-    def __init__(self,dataset,latent,
-                 real_samples_ph,latent_samples_ph):
+    def __init__(self, dataset, latent,
+                 real_samples_ph, latent_samples_ph):
         self.dataset = dataset
         self.latent = latent
         self.real_samples_ph = real_samples_ph
         self.latent_samples_ph = latent_samples_ph
         self.feed_dict = None
 
-    def get_data_dict(self, n_real_samples=None, n_latent_samples=None,training=[]):
+    def get_data_dict(self, n_real_samples=None, n_latent_samples=None, training=[]):
         """
         Returns a feed_dict for evaluation parts of the tensorboard graph.
         The dictionary includes variables for activating train and testing of the batchnorm and
