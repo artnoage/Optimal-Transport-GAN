@@ -33,13 +33,15 @@ class AssignmentTraining:
         self.critic_network = critic_network
         self.generator_network = generator_network
         self.cost=cost
-        self.experiment_name = self.dataset.name + "_" + self.cost + "_" + self.latent.name+ "_" + time.strftime("_%Y-%m-%d_%H-%M-%S_")
+        self.experiment_name = self.dataset.name + "_"\
+                               + self.cost + "_" \
+                               + self.latent.name+ "_" \
+                               + time.strftime("_%Y-%m-%d_%H-%M-%S_")
         self.model = Assignment_model(self.dataset, self.latent, self.generator_network, self.critic_network,self.cost)
         self.global_step = tf.train.get_or_create_global_step(graph=None)
         self.increase_global_step = tf.assign_add(self.global_step, 1)
         self.session = Settings.create_session()
         self.session.run(tf.initialize_all_variables())
-
 
     def train(self, n_critic_loops=None, n_main_loops=None):
         with self.session as session:
@@ -85,13 +87,12 @@ class AssignmentTraining:
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
-
-        # accumulate some real and fake samples
+        # accumulate fake samples and dump them into a file
         if max_loop-1 == main_loop:
             latent_points = session.run(self.model.generate_latent_batch)
             fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-            n_fake_to_save = 100000
-            while(fake_points.shape[0]<n_fake_to_save):
+            n_fake_samples_to_save = 100000
+            while(fake_points.shape[0]<n_fake_samples_to_save):
                 latent_points = session.run(self.model.generate_latent_batch)
                 fake_points_new = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
                 fake_points = np.vstack((fake_points, fake_points_new))
