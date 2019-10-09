@@ -167,7 +167,7 @@ class Assignment_model:
     def assignment_generator_cost_square(self):
         self.real_batch = self.real_batch_ph
         subed_batches = self.feeded_generated_batch - self.real_batch
-        gen_cost = tf.reduce_mean(tf.square(tf.norm(subed_batches, axis=0)))
+        gen_cost = tf.reduce_mean(tf.square(tf.norm(subed_batches, axis=1)))
         return gen_cost
 
     def train_critic(self,session,assign_arr):
@@ -180,10 +180,12 @@ class Assignment_model:
         session.run(self.crit_train_op, samples)
 
     def train_generator(self, session, real_idx, latent_sample, offset=2000):
+        cost=[]
         for c_idx in range(0, int(len(real_idx) - offset + 1), int(offset)):
             step_2_dict = {}
             step_2_dict.update({ self.real_batch_ph: self.dataset.data[real_idx[c_idx:c_idx + offset]],
                                 self.latent_batch_ph: latent_sample[c_idx:c_idx + offset]})
             step_2_dict.update({self.gen_network.get_training_placeholder(): True})
             _, A = session.run([self.gen_train_op, self.gen_cost], step_2_dict)
-            print("The trasportation distance for this batch is", A)
+            cost.append(A)
+        print("The trasportation distance for this batch is", np.average(A))
