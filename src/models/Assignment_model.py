@@ -138,8 +138,11 @@ class Assignment_model:
         # shifting might not be needed for psnr but also dosen't hurt
         new1 = new1 + 1
         new2 = new2 + 1
-        dist = 1 - tf.image.psnr(new1,new2,2,filter_size=4)
-        # we reshape the calucated distance vector to be a distance matrix
+        dist = 1 - tf.image.psnr(
+            new1,
+            new2,
+            2)
+
         dist = tf.transpose(self.crit_network.tensor(real_points)) + tf.transpose(
             tf.reshape(dist, (tf.shape(real_points)[0], tf.shape(fake_samples)[0])))
         # we find the minimal distance between a fake sample and a real one and return the index position of the real
