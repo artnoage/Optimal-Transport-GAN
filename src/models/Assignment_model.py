@@ -188,4 +188,4 @@ class Assignment_model:
             step_2_dict.update({self.gen_network.get_training_placeholder(): True})
             _, A = session.run([self.gen_train_op, self.gen_cost], step_2_dict)
             cost.append(A)
-        print("The trasportation distance for this batch is", np.average(A))
+        print("The trasportation distance is", np.average(A))
