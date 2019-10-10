@@ -77,20 +77,22 @@ class AssignmentTraining:
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
-                latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.5, size=(18, self.latent.shape))
-                latent_sample2 = np.copy(latent_sample[:18])
+                latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.8,
+                                                                            size=(18, self.latent.shape))
+                latent_sample2 = np.copy(latent_sample)
                 np.random.shuffle(latent_sample2)
-                int_sample = 0.8 * latent_sample[:18] + 0.2 * latent_sample2
+                int_sample = 0.5 * latent_sample[:18] + 0.5 * latent_sample2[:18]
 
                 reals = self.dataset.data[real_idx[:18]]
                 fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
-                fakes_noisy = session.run(self.model.get_fake_tensor(),{self.model.latent_batch_ph: latent_sample_noisy})
+                fakes_noisy = session.run(self.model.get_fake_tensor(),
+                                          {self.model.latent_batch_ph: latent_sample_noisy})
                 fakes_int = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: int_sample})
 
                 self.log_data(main_loop, n_main_loops, session)
-                self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
-                self.logger.log_image_grid_fixed(fakes, fakes_noisy, main_loop, name="Generated_and_neighbours.")
-                self.logger.log_image_grid_fixed(fakes, fakes_int, main_loop,name="Interpolations_between_generated")
+                self.logger.log_image_grid_fixed(reals, fakes, main_loop, name="Generated_and_assigned")
+                self.logger.log_image_grid_fixed(fakes_noisy, fakes, main_loop, name="Generated_and_neighbours.")
+                self.logger.log_image_grid_fixed(fakes_int, fakes, main_loop, name="Interpolations_between_generated")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
