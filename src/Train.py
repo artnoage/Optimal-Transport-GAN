@@ -81,9 +81,16 @@ class AssignmentTraining:
                 reals = self.dataset.data[real_idx[:18]]
                 self.log_data(main_loop,n_main_loops,session)
                 self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
-                latent_points = session.run(self.model.generate_latent_batch)
+                latent_points = session.run(self.model.generate_latent_batch_noisy)
                 fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                self.logger.log_image_grid_fixed(fake_points,fake_points,main_loop,name="same_latent_as_save")
+                latent_points2 = session.run(self.model.generate_latent_batch_noisy)
+                fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
+                self.logger.log_image_grid_fixed(fake_points,fake_points2,main_loop,name="Generator's output around latent space")
+                latent_points = session.run(self.model.generate_latent_batch_noisy)
+                fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
+                latent_points2 = session.run(self.model.generate_latent_batch_noisy)
+                fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
+                self.logger.log_image_grid_fixed(fake_points, fake_points2, main_loop, name="Generator's output on interpolated latent points")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
@@ -111,7 +118,7 @@ def main():
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=1024,xdim=32*32*1),
                                              generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=200, n_critic_loops=10)
+    assignment_training.train(n_main_loops=200, n_critic_loops=15)
 
 if __name__ == "__main__":
     main()
