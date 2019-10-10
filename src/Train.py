@@ -81,16 +81,16 @@ class AssignmentTraining:
                 reals = self.dataset.data[real_idx[:18]]
                 self.log_data(main_loop,n_main_loops,session)
                 self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
-                latent_points = session.run(self.model.generate_latent_batch_noisy)
+                latent_points,latent_points2 = session.run([self.model.generate_latent_batch, self.model.generate_latent_batch_noisy])
                 fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                latent_points2 = session.run(self.model.generate_latent_batch_noisy)
                 fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
-                self.logger.log_image_grid_fixed(fake_points,fake_points2,main_loop,name="Output_around_latent_space")
-                latent_points = session.run(self.model.generate_latent_batch_interpolation)
+                self.logger.log_image_grid_fixed(fake_points,fake_points2,main_loop,name="Generated_and_neighbours.")
                 fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                latent_points2 = session.run(self.model.generate_latent_batch_interpolation)
+                latent_points2=np.copy(latent_points)
+                np.random.shuffle(latent_points2)
+                latent_points2 = 0.5*latent_points + 0.5*latent_points2
                 fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
-                self.logger.log_image_grid_fixed(fake_points, fake_points2, main_loop, name="Output_on_interpolated_latent_points")
+                self.logger.log_image_grid_fixed(fake_points, fake_points2, main_loop, name="Interpolations_between_generated")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
