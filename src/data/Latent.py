@@ -40,14 +40,18 @@ class Gaussian_latent(Latent):
     def tensor(self):
         return tf.random_normal(shape=(self.batch_size, self.shape))
 
-# With this method, we generate random points in our latent space. The points are taken from N Gaussians with some Variance.
-# If one makes N too big then we have a perfect fit, or an overfit depending how one sees it.
+# With this method, we generate random points in our latent space. The points are taken from N Gaussians with some variance.
+# If one makes N too big and variance small then we have a ``perfect fit", or an overfit depending how one sees it.
+# This is the case where we get the biggest amount of details in our dataset.
 # If the number of Gaussians is small then it is harder to train and someone has to increase the number of critic steps and variance to avoid mode collapse.
 # However we expect that if the dataset allows it, then small N of Gaussians will result in some clustering of the data.
 # We also prefer this method from the standard one, because we believe that quite often the data manifold has different geometry in different parts.
-# In the case of Fashion Mnist one needs more Gaussians than the dataset itself. We believe that this happens because the Mnist databases dont really have
-# any accumulation points, at least with the Euclidean distance.
-# If for your data set, you observe that you have many non_assigned points, either increase the factor in front of the noise or the number of Gaussians.
+# In the case of Fashion Mnist one needs more Gaussians than the dataset itself. We believe that this happens because the Mnist databases do not really have
+# any accumulation points, at least with the Euclidean distance. If one takes a smaller number of Gaussians (80%-90% of the points) with medium variance (0.5),
+# then we observe some interesting phenomena. The training method will start dropping some of the points (some mode collapse) but increase the accuracy.
+# Further increase on the variance will result in a non accurate training similar to the case of the one Gaussian.
+# A more dynamic way of changing the number of gaussian and assigning individual variances may result in better data representation.
+
 
 class Assignment_latent(Latent):
 
