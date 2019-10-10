@@ -1,3 +1,8 @@
+#In this file we found the hyparparameters in order to first fully train the critic and then the generator.
+#It takes about half a day for only 500 data points. It is not recommended for traiining but maybe for further experiments.
+
+
+
 import os
 import time
 import tqdm
