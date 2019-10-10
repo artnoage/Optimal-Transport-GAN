@@ -77,20 +77,20 @@ class AssignmentTraining:
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
-                fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
+                latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.5, size=(18, self.latent.shape))
+                latent_sample2 = np.copy(latent_sample[:18])
+                np.random.shuffle(latent_sample2)
+                int_sample = 0.8 * latent_sample[:18] + 0.2 * latent_sample2
+
                 reals = self.dataset.data[real_idx[:18]]
-                self.log_data(main_loop,n_main_loops,session)
-                self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="Real_and_assigned")
-                latent_points,latent_points2 = session.run([self.model.generate_latent_batch, self.model.generate_latent_batch_noisy])
-                fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
-                self.logger.log_image_grid_fixed(fake_points,fake_points2,main_loop,name="Generated_and_neighbours.")
-                fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                latent_points2=np.copy(latent_points)
-                np.random.shuffle(latent_points2)
-                latent_points2 = 0.5*latent_points + 0.5*latent_points2
-                fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
-                self.logger.log_image_grid_fixed(fake_points, fake_points2, main_loop, name="Generated_and_interpolations")
+                fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
+                fakes_noisy = session.run(self.model.get_fake_tensor(),{self.model.latent_batch_ph: latent_sample_noisy})
+                fakes_int = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: int_sample})
+
+                self.log_data(main_loop, n_main_loops, session)
+                self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
+                self.logger.log_image_grid_fixed(fakes, fakes_noisy, main_loop, name="Generated_and_neighbours.")
+                self.logger.log_image_grid_fixed(fakes, fakes_int, main_loop,name="Interpolations_between_generated")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
@@ -118,7 +118,7 @@ def main():
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=1024,xdim=32*32*1),
                                              generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=200, n_critic_loops=10)
+    assignment_training.train(n_main_loops=200, n_critic_loops=1)
 
 if __name__ == "__main__":
     main()
