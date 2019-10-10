@@ -24,7 +24,7 @@ class Assignment_model:
         self.generate_latent_batch = self.latent.tensor()
 
         # tensor that will generate a new latent batch with some extra noise each time we use it in the graph
-        self.generate_latent_batch_noisy=self.latent.tensor()+0.5*tf.random_normal(shape=(self.latent.batch_size, self.latent.shape))
+        self.generate_latent_batch_noisy=self.latent.tensor()+0.2*tf.random_normal(shape=(self.latent.batch_size, self.latent.shape))
 
         # tensor that will generate a new batch that is the interpolation between two latent batches each time we use it in the graph
         self.generate_latent_batch_interpolation = 0.5*self.latent.tensor() + 0.5*tf.random.shuffle(self.latent.tensor())
