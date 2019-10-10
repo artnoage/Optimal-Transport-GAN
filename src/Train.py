@@ -85,12 +85,12 @@ class AssignmentTraining:
                 fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
                 latent_points2 = session.run(self.model.generate_latent_batch_noisy)
                 fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
-                self.logger.log_image_grid_fixed(fake_points,fake_points2,main_loop,name="Generator's output around latent space")
-                latent_points = session.run(self.model.generate_latent_batch_noisy)
+                self.logger.log_image_grid_fixed(fake_points,fake_points2,main_loop,name="Output_around_latent_space")
+                latent_points = session.run(self.model.generate_latent_batch_interpolation)
                 fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                latent_points2 = session.run(self.model.generate_latent_batch_noisy)
+                latent_points2 = session.run(self.model.generate_latent_batch_interpolation)
                 fake_points2 = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points2})
-                self.logger.log_image_grid_fixed(fake_points, fake_points2, main_loop, name="Generator's output on interpolated latent points")
+                self.logger.log_image_grid_fixed(fake_points, fake_points2, main_loop, name="Output_on_interpolated_latent_points")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
@@ -118,7 +118,7 @@ def main():
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=1024,xdim=32*32*1),
                                              generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=200, n_critic_loops=15)
+    assignment_training.train(n_main_loops=200, n_critic_loops=10)
 
 if __name__ == "__main__":
     main()
