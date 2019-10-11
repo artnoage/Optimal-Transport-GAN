@@ -69,7 +69,8 @@ class AssignmentTraining:
                 latent_sample = np.vstack(tuple(latent_sample))
                 real_idx = np.vstack(tuple(real_idx)).flatten()
 
-                # The smaller the offset the more precisely the generator learns. However very small offset number increases the training a lot and may lead to difficulties of traiing the
+                # The smaller the offset the more precisely the generator learns. However very small offset number
+                # increases the training a lot and may lead to difficulties of training the
                 # critic because it converges fast to some of the nodes.
 
                 self.model.train_generator(session, real_idx,latent_sample,offset=16)
@@ -77,11 +78,10 @@ class AssignmentTraining:
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
-                latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.8,
-                                                                            size=(18, self.latent.shape))
-                latent_sample2 = np.copy(latent_sample)
+                latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.3, size=(18, self.latent.shape))
+                latent_sample2 = np.copy(latent_sample[:18])
                 np.random.shuffle(latent_sample2)
-                int_sample = 0.5 * latent_sample[:18] + 0.5 * latent_sample2[:18]
+                int_sample = 0.8 * latent_sample[:18] + 0.2 * latent_sample2
 
                 reals = self.dataset.data[real_idx[:18]]
                 fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
@@ -90,9 +90,9 @@ class AssignmentTraining:
                 fakes_int = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: int_sample})
 
                 self.log_data(main_loop, n_main_loops, session)
-                self.logger.log_image_grid_fixed(reals, fakes, main_loop, name="Generated_and_assigned")
-                self.logger.log_image_grid_fixed(fakes_noisy, fakes, main_loop, name="Generated_and_neighbours.")
-                self.logger.log_image_grid_fixed(fakes_int, fakes, main_loop, name="Interpolations_between_generated")
+                self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
+                self.logger.log_image_grid_fixed(fakes, fakes_noisy, main_loop, name="Generated_and_neighbours.")
+                self.logger.log_image_grid_fixed(fakes, fakes_int, main_loop, name="Interpolations_between_generated")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
