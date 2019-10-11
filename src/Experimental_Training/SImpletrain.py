@@ -1,3 +1,7 @@
+#This is a way to train with smaller batches of generated points. It is closer to the way traditional gans are trained.
+# It is faster but we dont have any control of node dropping (mode collapse)
+# maybe a hybrid method will be optimal
+
 import os
 import time
 import tqdm
