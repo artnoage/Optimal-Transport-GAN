@@ -24,10 +24,9 @@ def make_image_grid(image_array, to_shape=None, rows=6, columns=3, save_image=Fa
         slide_list.append(np.concatenate(image_list[column * rows:(column + 1) * rows], axis=1))
     full = np.vstack(slide_list)
     if save_image:
-        if save_image:
-            os.makedirs(os.path.join(os.getcwd(), "pictures"), exist_ok=True)
-            path = os.path.join(os.getcwd(), "pictures", name + '.png')
-            imageio.imwrite(path, full)
+        os.makedirs(os.path.join(os.getcwd(), "pictures"), exist_ok=True)
+        path = os.path.join(os.getcwd(), "pictures", name + '.png')
+        imageio.imwrite(path, full)
     return full
 
 
