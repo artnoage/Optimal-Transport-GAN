@@ -35,12 +35,12 @@ space. The first one is the standard by now option of one Gaussian. As a
 second method, we tried the option of multiple Gaussians  with some 
 fixed variance sigma. If one makes the number of Gaussians too big and 
 variance small then we have a "perfect fit", or an overfit depending on 
-how one sees it. This is the case where we get the biggest amount of 
+how one sees it. This is the case where we get the best degree of 
 details in our Fashion dataset. If the number of Gaussians is small then 
 it is harder to train and someone has to increase the number of critic 
 steps (around 10), main steps (up to 100 times) and variance to avoid 
 mode collapse. However we expect that if the dataset allows it, then 
-small N of Gaussians will result in some clustering of the data. 
+small number of Gaussians will result in some clustering of the data. 
 We also prefer this method from the standard one, because we believe 
 that quite often the data manifold has different 
 geometry in different parts.
