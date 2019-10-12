@@ -96,7 +96,7 @@ class AssignmentTraining:
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
-        # accumulate fake samples and dump them into a file
+        # accumulate fake samples and dump them into a file at the end of the training
         if max_loop-1 == main_loop:
             latent_points = session.run(self.model.generate_latent_batch)
             fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
