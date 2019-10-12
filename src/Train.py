@@ -125,8 +125,8 @@ class AssignmentTraining:
 # allows
 def main():
     Settings.setup_enviroment(gpu=2)
-    assignment = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
-                                    latent=MultiGaussian_latent(shape=250, batch_size=200),
+    assignment = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
+                                    latent=MultiGaussian_latent(shape=250, batch_size=100),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=1024,xdim=32*32*1),
                                              generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
