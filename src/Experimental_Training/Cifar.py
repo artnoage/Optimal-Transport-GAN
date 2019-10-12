@@ -34,6 +34,8 @@ class AssignmentTraining:
         self.generator_network = generator_network
         self.cost=cost
         self.experiment_name = self.dataset.name + "_" + self.cost + "_" + self.latent.name+ "_" + time.strftime("_%Y-%m-%d_%H-%M-%S_")
+        self.log_path = os.path.join(os.path.dirname(os.getcwd()), "logs" + os.sep + self.experiment_name)
+
         self.model = Assignment_model(self.dataset, self.latent, self.generator_network, self.critic_network,self.cost)
         self.global_step = tf.train.get_or_create_global_step(graph=None)
         self.increase_global_step = tf.assign_add(self.global_step, 1)
@@ -43,8 +45,7 @@ class AssignmentTraining:
 
     def train(self, n_critic_loops=None, n_main_loops=None):
         with self.session as session:
-            log_path = os.path.join(os.getcwd(), "logs" + os.sep + self.experiment_name)
-            log_writer = tf.summary.FileWriter(log_path, session.graph)
+            log_writer = tf.summary.FileWriter(self.log_path, session.graph)
             self.logger = LoggerFacade(session, log_writer, self.dataset.shape)
             global_step = session.run(self.global_step)
             self.n_zeros = self.latent.batch_size
@@ -85,8 +86,7 @@ class AssignmentTraining:
                 latent_points = session.run(self.model.generate_latent_batch)
                 fake_points_new = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
                 fake_points = np.vstack((fake_points, fake_points_new))
-            dump_path =  "logs" + os.sep + self.experiment_name+os.sep
-            np.save(dump_path + "fakes_" +str(main_loop), fake_points)
+            np.save(self.log_path + "fakes_" +str(main_loop), fake_points)
 
 
 def main():

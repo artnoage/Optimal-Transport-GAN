@@ -32,7 +32,6 @@ def make_image_grid(image_array, to_shape=None, rows=6, columns=3, save_image=Fa
 
 def wasserstein_distance(X, Y, Npoints_arg):
     X = np.reshape(X, (Npoints_arg, -1))
-
     Y = np.reshape(Y, (Npoints_arg, -1))
     M = ot.dist(X, Y, metric='euclidean')
     n = Npoints_arg

@@ -14,9 +14,6 @@ from data.Cifar import Cifar
 from networks.DenseGenerator import *
 from networks.DenseCritic import *
 from Settings import Settings
-
-
-data_path = os.getcwd() + os.sep + "Data"
 import numpy as np
 
 
@@ -37,7 +34,12 @@ class AssignmentTraining:
                                + self.cost + "_" \
                                + self.latent.name+ "_" \
                                + time.strftime("_%Y-%m-%d_%H-%M-%S_")
-        self.model = Assignment_model(self.dataset, self.latent, self.generator_network, self.critic_network,self.cost)
+        self.log_path = os.path.join(os.path.dirname(os.getcwd()), "logs" + os.sep + self.experiment_name)
+        self.model = Assignment_model(self.dataset,
+                                      self.latent,
+                                      self.generator_network,
+                                      self.critic_network,
+                                      self.cost)
         self.global_step = tf.train.get_or_create_global_step(graph=None)
         self.increase_global_step = tf.assign_add(self.global_step, 1)
         self.session = Settings.create_session()
@@ -45,8 +47,7 @@ class AssignmentTraining:
 
     def train(self, n_critic_loops=None, n_main_loops=None):
         with self.session as session:
-            log_path = os.path.join(os.getcwd(), "logs" + os.sep + self.experiment_name)
-            log_writer = tf.summary.FileWriter(log_path, session.graph)
+            log_writer = tf.summary.FileWriter(self.log_path, session.graph)
             self.logger = LoggerFacade(session, log_writer, self.dataset.shape)
             global_step = session.run(self.global_step)
             self.n_non_assigned = self.latent.batch_size
@@ -63,8 +64,10 @@ class AssignmentTraining:
                         self.model.train_critic(session, assign_arr)
                         self.n_non_assigned = len(assign_arr) - np.count_nonzero(assign_arr)
                         crit_bar.set_description(
-                        "step 1: Number of non assigned points " + str(self.n_non_assigned) + ",  Variance from perfect assignment" + str(np.var(assign_arr)),
-                            refresh=False)
+                            "step 1: Number of non assigned points " + str(self.n_non_assigned) +
+                            ",  Variance from perfect assignment" + str(np.var(assign_arr)),
+                            refresh=False
+                        )
 
                 latent_sample = np.vstack(tuple(latent_sample))
                 real_idx = np.vstack(tuple(real_idx)).flatten()
@@ -98,15 +101,14 @@ class AssignmentTraining:
     def log_data(self, main_loop,max_loop,session):
         # accumulate fake samples and dump them into a file
         if max_loop-1 == main_loop:
+            n_fake_samples_to_save = 100000
             latent_points = session.run(self.model.generate_latent_batch)
             fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-            n_fake_samples_to_save = 100000
             while(fake_points.shape[0]<n_fake_samples_to_save):
                 latent_points = session.run(self.model.generate_latent_batch)
                 fake_points_new = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
                 fake_points = np.vstack((fake_points, fake_points_new))
-            dump_path =  "logs" + os.sep + self.experiment_name+os.sep
-            np.save(dump_path + "fakes_" +str(main_loop), fake_points)
+            np.save(self.log_path + "fakes_" +str(main_loop), fake_points)
 
 #For cost you have the options "sqaure", "psnr" and "ssim". "Psnr option trains only the critic with psnr and the generator with SSIM.
 # The reason for doing that is that training the critic with ssim is computationally very expensive while with psnr is cheap and the results are quite similar.
@@ -114,13 +116,13 @@ class AssignmentTraining:
 # For the batch_sizes try to have the Real points batch size as close to the dataset_size as possible. Then increase latent batch size to the degree that memory
 # allows
 def main():
-    Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
-                                             latent=Assignment_latent(shape=250, batch_size=200),
+    Settings.setup_enviroment(gpu=2)
+    assignment = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
+                                    latent=Assignment_latent(shape=250, batch_size=200),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=1024,xdim=32*32*1),
                                              generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=200, n_critic_loops=10)
+    assignment.train(n_main_loops=200, n_critic_loops=10)
 
 if __name__ == "__main__":
     main()
