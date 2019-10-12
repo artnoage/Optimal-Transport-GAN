@@ -99,6 +99,7 @@ class AssignmentTraining:
                     #self.logger.log_image_grid_fixed(fakes, fakes_noisy, main_loop, name="Generated_and_neighbours.")
 
                     #This is to see how points between two generated points look like
+
                     #self.logger.log_image_grid_fixed(fakes, fakes_int, main_loop, name="Interpolations_between_generated")
             log_writer.close()
 
