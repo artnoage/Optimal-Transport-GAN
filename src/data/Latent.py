@@ -56,7 +56,7 @@ class Gaussian_latent(Latent):
 # A more dynamic way of changing the number of gaussian and assigning individual variances may result in better data representation.
 
 
-class Assignment_latent(Latent):
+class MultiGaussian_latent(Latent):
 
     def __init__(self, shape=None, batch_size=None):
         super().__init__()

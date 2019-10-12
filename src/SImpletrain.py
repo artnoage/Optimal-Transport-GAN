@@ -1,6 +1,5 @@
 #This is a way to train with smaller batches of generated points. It is closer to the way traditional gans are trained.
-# It is faster but we dont have any control of node dropping (mode collapse)
-# maybe a hybrid method will be optimal
+# It is faster but we dont have any control of node dropping (mode collapse). Maybe a hybrid train will be optimal.
 
 import os
 import time
@@ -55,9 +54,7 @@ class AssignmentTraining:
             self.n_non_assigned = self.latent.batch_size
             for main_loop in tqdm.tqdm(range(global_step, n_main_loops, 1)):
 
-                #The ideal number for assigment points is 10-12 times the size of the dataset. However it is convinient
-                # to increase the size with the iterations because in the beginning of the training, big number of assignments does
-                #not help that much
+                #Here unlike in our other training method, we keep the number of assigned loops small.
 
                 assignment_loops=2
                 with tqdm.tqdm(range(n_critic_loops)) as crit_bar:
@@ -80,13 +77,29 @@ class AssignmentTraining:
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
-                fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
-                reals = self.dataset.data[real_idx[:18]]
-                self.log_data(main_loop,n_main_loops,session)
-                self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
-                latent_points = session.run(self.model.generate_latent_batch)
-                fake_points = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_points})
-                self.logger.log_image_grid_fixed(fake_points,fake_points,main_loop,name="same_latent_as_save")
+                if main_loop % 50 == 1:
+                    latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.3,
+                                                                                size=(18, self.latent.shape))
+                    latent_sample2 = np.copy(latent_sample[:18])
+                    np.random.shuffle(latent_sample2)
+                    int_sample = 0.8 * latent_sample[:18] + 0.2 * latent_sample2
+
+                    reals = self.dataset.data[real_idx[:18]]
+                    fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
+                    fakes_noisy = session.run(self.model.get_fake_tensor(),
+                                              {self.model.latent_batch_ph: latent_sample_noisy})
+                    fakes_int = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: int_sample})
+
+                    self.log_data(main_loop, n_main_loops, session)
+                    self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
+                    # This is for the case where one uses multiGaussian as a way to sample the latent space. Since in
+                    # case we have a perfect fit, if one want to see "new" generated points has to move a bit further from
+                    # the Gaussians
+
+                    # self.logger.log_image_grid_fixed(fakes, fakes_noisy, main_loop, name="Generated_and_neighbours.")
+
+                    # This is to see how points between two generated points look like
+                    # self.logger.log_image_grid_fixed(fakes, fakes_int, main_loop, name="Interpolations_between_generated")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
@@ -108,12 +121,12 @@ class AssignmentTraining:
 # allows
 def main():
     Settings.setup_enviroment(gpu=0)
-    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
-                                             latent=Assignment_latent(shape=250, batch_size=200),
+    assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
+                                             latent=Gaussian_latent(shape=250, batch_size=100),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=1024,xdim=32*32*1),
                                              generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
-    assignment_training.train(n_main_loops=200, n_critic_loops=5)
+    assignment_training.train(n_main_loops=10000, n_critic_loops=5)
 
 if __name__ == "__main__":
     main()
