@@ -1,6 +1,6 @@
 # Optimal-Transport-GAN
 
-This repository is a Tensorflow implementation of [Training Generative Networks with general Optimal Transport distances](https://arxiv.org/abs/1910.00535)
+This repository is a Tensorflow implementation of [Training Generative Networks with general Optimal Transport distances](https://arxiv.org/abs/1910.00535). It can be used for MNIST, FASHION-MNIST and CIFAR10.
 
 
 ### Installing
