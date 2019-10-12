@@ -82,3 +82,7 @@ is a "proof" that you can train the critic first and then the generator
  on the complexity of the generated points) and is  not optimal. If the
  generated points have some structure (not random noise) already,
  then the critic trains easier
+ 
+ We are welcoming any new ideas for training, and also we are very 
+ interested in testing other cost functions that are suitable for different
+ data sets.
