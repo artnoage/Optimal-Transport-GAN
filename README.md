@@ -11,3 +11,10 @@ conda create -n myenv python=3.6
 conda activate myenv
 pip install -r requirements.txt
 ```
+
+### Training
+To train our model run.
+```
+python3 Train.py
+```
+
