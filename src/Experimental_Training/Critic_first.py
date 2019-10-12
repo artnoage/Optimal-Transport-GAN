@@ -109,7 +109,7 @@ class AssignmentTraining:
 def main():
     Settings.setup_enviroment(gpu=1)
     assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=500, dataset_size=500),
-                                             latent=MultiGaussian_latent(shape=50, batch_size=2500),
+                                             latent=Multigaussian_latent(shape=50, batch_size=2500),
                                              critic_network=DenseCritic(name="critic", learn_rate=1e-6,layer_dim=1256,xdim=32*32*1),
                                              generator_network=DenseGenerator(name="generator", learn_rate=1e-4, layer_dim=1256, xdim=32*32*1),
                                              cost="square")

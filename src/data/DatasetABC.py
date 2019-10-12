@@ -93,15 +93,6 @@ class DatasetABC(ABC):
         else:
             return self.dataset_iterator.get_next()
 
-    def get_batch_size(self):
-        """
-        The size of the batch that will be returned if samples are drawn
-
-
-        :return: default batch size
-        """
-        return self.batch_size
-
     def get_total_shape(self):
         """
         Returns the total dimensions of the dataset
