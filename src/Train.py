@@ -78,21 +78,28 @@ class AssignmentTraining:
                 session.run(self.increase_global_step)
 
                 # It makes images for Tensorboard
-                latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.3, size=(18, self.latent.shape))
-                latent_sample2 = np.copy(latent_sample[:18])
-                np.random.shuffle(latent_sample2)
-                int_sample = 0.8 * latent_sample[:18] + 0.2 * latent_sample2
+                if main_loop%50==1:
+                    latent_sample_noisy = latent_sample[:18] + np.random.normal(loc=0, scale=0.3, size=(18, self.latent.shape))
+                    latent_sample2 = np.copy(latent_sample[:18])
+                    np.random.shuffle(latent_sample2)
+                    int_sample = 0.8 * latent_sample[:18] + 0.2 * latent_sample2
 
-                reals = self.dataset.data[real_idx[:18]]
-                fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
-                fakes_noisy = session.run(self.model.get_fake_tensor(),
-                                          {self.model.latent_batch_ph: latent_sample_noisy})
-                fakes_int = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: int_sample})
+                    reals = self.dataset.data[real_idx[:18]]
+                    fakes = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: latent_sample[:18]})
+                    fakes_noisy = session.run(self.model.get_fake_tensor(),
+                                              {self.model.latent_batch_ph: latent_sample_noisy})
+                    fakes_int = session.run(self.model.get_fake_tensor(), {self.model.latent_batch_ph: int_sample})
 
-                self.log_data(main_loop, n_main_loops, session)
-                self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
-                self.logger.log_image_grid_fixed(fakes, fakes_noisy, main_loop, name="Generated_and_neighbours.")
-                self.logger.log_image_grid_fixed(fakes, fakes_int, main_loop, name="Interpolations_between_generated")
+                    self.log_data(main_loop, n_main_loops, session)
+                    self.logger.log_image_grid_fixed(fakes, reals, main_loop, name="real_and_assigned")
+                    # This is for the case where one uses multiGaussian as a way to sample the latent space. Since in
+                    # case we have a perfect fit, if one want to see "new" generated points has to move a bit further from
+                    # the Gaussians
+
+                    #self.logger.log_image_grid_fixed(fakes, fakes_noisy, main_loop, name="Generated_and_neighbours.")
+
+                    #This is to see how points between two generated points look like
+                    #self.logger.log_image_grid_fixed(fakes, fakes_int, main_loop, name="Interpolations_between_generated")
             log_writer.close()
 
     def log_data(self, main_loop,max_loop,session):
@@ -116,7 +123,7 @@ class AssignmentTraining:
 def main():
     Settings.setup_enviroment(gpu=0)
     assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=1000, dataset_size=1000),
-                                             latent=Assignment_latent(shape=250, batch_size=200),
+                                             latent=MultiGaussian_latent(shape=250, batch_size=200),
                                              critic_network=DenseCritic(name="critic", learn_rate=5e-5,layer_dim=1024,xdim=32*32*1),
                                              generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
                                              cost="square")
