@@ -39,8 +39,9 @@ second method, we tried the option of multiple Gaussians  with some
 fixed variance sigma. 
 
 If one picks the standard way for sampling the latent space, will notice that
-the training takes much longer and the level of detail in the generated images
-seems to be bounded. If one picks the second method for training, then more 
+training with the first method (Train.py) takes much longer and the level 
+of detail in the generated images seems to be bounded. 
+With the second method for training (Simpletrain.py), more 
 detail in the results is achieved, but we expect that some node dropping takes
 place. We believe that trying to find a model to fit ALL the real data points is 
 very hard. Therefore the training has to pick between accurasy and avoiding 
