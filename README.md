@@ -72,7 +72,8 @@ WGAN-GP way of training). Further increase in the variance will result in a
 training similar to the case of the one Gaussian. 
 
 A more dynamic way of changing the number of gaussian and assigning 
-individual variances may result in better data representation.
+individual variances may result in better data representation. Also some
+targeted drop of nodes may result in better fits.
 
 ### Experimental Training
 
