@@ -16,7 +16,7 @@ class Settings:
     @staticmethod
     def create_session():
         config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
+        config.gpu_options.per_process_gpu_memory_fraction = 0.9
         return tf.Session(config=config)
 
 
