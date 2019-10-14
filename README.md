@@ -88,3 +88,9 @@ is a "proof" that you can train the critic first and then the generator
  We are welcoming any new ideas for training, and also we are very 
  interested in testing other cost functions that are more suitable for different
  data sets.
+
+### Known issues.
+
+We recently noticed that our code does not function well with a GTX 980 TI.
+Very often the generator collapses and gives nan values. We note that
+had no issues whatsoever with GTX 960, GTX 1050TI, and Titan X.
