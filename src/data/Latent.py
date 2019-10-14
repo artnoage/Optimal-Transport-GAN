@@ -58,7 +58,7 @@ class Gaussian_latent(Latent):
 
 class Multigaussian_latent(Latent):
 
-    def __init__(self, shape=None, batch_size=None):
+    def __init__(self, sigma=0.1, shape=None, batch_size=None):
         super().__init__()
         N_Gaussians=10000
         self.shape = shape
@@ -66,7 +66,7 @@ class Multigaussian_latent(Latent):
         self.initial_points=np.random.normal(0,1,(N_Gaussians,self.shape))
         self.fixed_latent = tf.constant(self.initial_points, dtype=tf.float32)
         self.name = "Assignment_latent"
-        self.sigma=0.1
+        self.sigma=sigma
     def sample(self, batch_size=None):
         raise NotImplemented
 
