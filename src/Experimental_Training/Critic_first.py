@@ -107,7 +107,7 @@ class AssignmentTraining:
 # For the batch_sizes try to have the Real points batch size as close to the dataset_size as possible. Then increase latent batch size to the degree that memory
 # allows
 def main():
-    Settings.setup_enviroment(gpu=1)
+    Settings.setup_enviroment(gpu=0)
     assignment_training = AssignmentTraining(dataset=Fashion32(batch_size=500, dataset_size=500),
                                              latent=Multigaussian_latent(shape=50, batch_size=2500),
                                              critic_network=DenseCritic(name="critic", learn_rate=1e-6,layer_dim=1256,xdim=32*32*1),
