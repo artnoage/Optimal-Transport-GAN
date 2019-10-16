@@ -128,7 +128,7 @@ def main():
     assignment = AssignmentTraining(dataset=Fashion32(batch_size=5000, dataset_size=5000),
                                     latent=Multigaussian_latent(sigma=0.1, shape=250, batch_size=100),
                                     critic_network=DenseCritic(name="critic", learn_rate=1e-4,layer_dim=1024,xdim=32*32*1),
-                                    generator_network=Deconv32(name="generator", learn_rate=1e-4, layer_dim=512),
+                                    generator_network=Deconv32(name="generator", learn_rate=5e-5, layer_dim=512),
                                     cost="square")
     assignment.train(n_main_loops=200, n_critic_loops=10)
 
