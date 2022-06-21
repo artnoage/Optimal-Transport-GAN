@@ -19,7 +19,7 @@ mkl-fft==1.0.14
 mkl-random==1.1.0
 mkl-service==2.3.0
 networkx==2.3
-numpy==1.17.2
+numpy==1.22.0
 Pillow==6.2.0
 POT==0.6.0
 protobuf==3.9.2
